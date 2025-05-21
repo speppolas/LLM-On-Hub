@@ -1,0 +1,113 @@
+# app/__init__.py
+# app/__init__.py
+
+import os
+import logging
+import pdfminer
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask import Flask, Blueprint, jsonify, request, render_template
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env file (always loaded before anything else)
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
+
+# Set PDFMiner logging level to WARNING
+pdfminer_logger = logging.getLogger("pdfminer")
+pdfminer_logger.setLevel(logging.WARNING)
+
+# Import configurations and database
+from models import db, ClinicalTrial  # Ensure db is imported from models.py
+from config import get_config
+
+# Initialize logging with the loaded configuration
+config_class = get_config()
+log_file_path = "logs/medmatchint.log"
+
+# Unified Logging Configuration
+logging.basicConfig(
+    level=getattr(logging, config_class.LOG_LEVEL, "DEBUG"),
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler(),             # Console log
+        logging.FileHandler(log_file_path, mode="a", encoding="utf-8")  # File log
+    ]
+)
+
+# Create the main logger for the app
+logger = logging.getLogger("medmatchint")
+logger.setLevel(logging.DEBUG)
+logger.info(f"✅ Logging configured. Log file: {log_file_path}")
+
+# Import routes Blueprint
+from app.api.routes import bp as api_bp
+
+migrate = Migrate()  # Initialize migrate globally
+
+def create_app(config_class=None):
+    logger.info("🔧 Creating MedMatchINT Application")
+    
+    app = Flask(
+        __name__, 
+        static_folder="static", 
+        template_folder="templates"  
+    )
+    
+    # Load configuration
+    if config_class is None:
+        config_class = get_config()
+    
+    app.config.from_object(config_class)
+    
+    # Set default UPLOAD_FOLDER if not specified
+    upload_dir = app.config.get("UPLOAD_FOLDER", Path(__file__).resolve().parent.parent / "uploads")
+    app.config["UPLOAD_FOLDER"] = str(upload_dir)
+    
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir)
+        logger.info(f"✅ Created upload directory: {upload_dir}")
+    
+    # Initialize extensions
+    db.init_app(app)  # Initialize the database with the app
+    migrate.init_app(app, db)  # Initialize Flask-Migrate with the app and db
+
+    # Register API Blueprint without /api prefix
+    app.register_blueprint(api_bp)
+    
+    # Serve your HTML interface on the root URL
+    @app.route("/")
+    def home():
+        return render_template("index.html")
+
+    # Middleware to clean all JSON responses (Automatic Response Cleaning)
+    @app.after_request
+    def clean_llm_response(response):
+        if response.content_type == 'application/json':
+            try:
+                data = response.get_json()
+                if isinstance(data, dict):
+                    unwanted_keys = [
+                        'context', 'total_duration', 
+                        'prompt_eval_duration', 'eval_count', 
+                        'eval_duration'
+                    ]
+                    for key in unwanted_keys:
+                        data.pop(key, None)
+                    response.data = jsonify(data).data
+            except Exception as e:
+                logger.error(f"Error during response cleaning: {str(e)}")
+        return response
+
+    # Ensure database schema is initialized (Now using Flask-Migrate)
+    with app.app_context():
+        logger.info("✅ Verifying database schema with migrations.")
+        try:
+            from flask_migrate import upgrade
+            upgrade()  # Automatically apply migrations on start
+            logger.info("✅ Database schema verified and upgraded successfully.")
+        except Exception as e:
+            logger.error(f"❌ Error during database migration: {str(e)}")
+    
+    logger.info("✅ MedMatchINT Application Initialized Successfully")
+    return app
