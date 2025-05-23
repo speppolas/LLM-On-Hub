@@ -82,7 +82,7 @@
       });
     } else {
       // fallback static models
-      ['llama3.1:8b-custom', 'mistral:latest'].forEach(model => {
+      ['llama3.1:8b-custom'].forEach(model => {
         const opt = document.createElement('option');
         opt.value = model;
         opt.text = model;

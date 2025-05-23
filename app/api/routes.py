@@ -13,6 +13,11 @@ from app.utils import (
 from app.core.feature_extraction import highlight_sources, extract_features_with_llm, match_trials_llm
 from app.core.llm_processor import get_llm_processor
 from app import logger 
+from app.core.feature_extraction import extract_features_with_llm, extract_text_from_pdf
+from app.core.medication_extraction import extract_medications_from_pdf
+from app.core.timeline_extraction import extract_timeline_from_pdf
+
+
 bp = Blueprint('api', __name__)
 logger = logging.getLogger(__name__)
        
@@ -22,6 +27,13 @@ def index():
     logger.info("✅ Accessed home page")
     return render_template('index.html')
 
+@bp.route('/medications')
+def medications():
+    return render_template('medications.html')
+
+@bp.route('/timeline')
+def timeline():
+    return render_template('timeline.html')
 
 @bp.route('/settings')
 def settings_page():
@@ -48,8 +60,6 @@ def update_settings():
         except Exception as e:
             logger.error(f"❌ Failed to retrieve settings: {e}")
             return jsonify({"status": "error", "message": str(e)}), 500
-        
-
 
 @bp.route('/api/models')
 def get_models():
@@ -123,6 +133,7 @@ def process():
         logger.exception("❌ Unhandled exception in /process")
         return jsonify({'error': str(e)}), 500
 
+
 @bp.route('/api/trials', methods=['GET'])
 def get_trials():
     try:
@@ -160,3 +171,48 @@ def clean_files():
     except Exception as e:
         logger.error(f"❌ Failed to clean files: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
+    
+@bp.route('/process_medications', methods=['POST'])
+def process_medications():
+    return handle_feature_extraction(extract_func=extract_medications_from_pdf, label="medications")
+
+
+@bp.route('/process_timeline', methods=['POST'])
+def process_timeline():
+    return handle_feature_extraction(extract_func=extract_timeline_from_pdf, label="timeline")
+
+
+def handle_feature_extraction(extract_func, label):
+    try:
+        upload_dir = current_app.config.get('UPLOAD_FOLDER', 'uploads')
+        os.makedirs(upload_dir, exist_ok=True)
+
+        file = request.files.get('file')
+        raw_text = request.form.get('text', '').strip()
+        pdf_filename = None
+        text = ''
+        features = {}
+
+        if file and file.filename.endswith('.pdf'):
+            pdf_filename = secure_filename(file.filename)
+            path = os.path.join(upload_dir, pdf_filename)
+            file.save(path)
+            with open(path, 'rb') as f:
+                features = extract_func(f)
+            logger.info(f"📄 Processed {label} PDF: {pdf_filename}")
+
+        elif raw_text:
+            features = extract_func(raw_text)
+            logger.info(f"📝 Processed {label} raw text ({len(raw_text)} chars)")
+
+        else:
+            return jsonify({'error': 'Please upload a PDF or enter clinical text.'}), 400
+
+        return jsonify({
+            'features': features,
+            'pdf_filename': pdf_filename
+        })
+
+    except Exception as e:
+        logger.exception(f"❌ Error processing {label}")
+        return jsonify({'error': str(e)}), 500

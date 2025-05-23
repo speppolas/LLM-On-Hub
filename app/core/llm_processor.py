@@ -22,7 +22,7 @@ def load_config():
     except Exception as e:
         logger.error(f"❌ Unable to load config file: {e}")
         return {
-            "LLM_MODEL": "llama3.1:8b-custom",
+            "LLM_MODEL": "gemma3:27b",
             "LLM_CONTEXT_SIZE": 131072,
             "LLM_TEMPERATURE": 0.1
         }

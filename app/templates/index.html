@@ -18,6 +18,16 @@
   <p class="header-subtitle">Upload patient data to find matching clinical trials</p>
 </div>
 
+<!-- Navigation to new pages -->
+<div class="mb-4">
+  <div class="btn-group" role="group" aria-label="Navigation Buttons">
+  <a href="{{ url_for('api.timeline') }}" class="btn btn-outline-secondary">Timeline Extraction</a>
+  <a href="{{ url_for('api.medications') }}" class="btn btn-outline-secondary">Medications</a>
+
+  </div>
+</div>
+
+
 <div id="alert-container"></div>
 
 <div class="card">
