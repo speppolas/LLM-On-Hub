@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block title %}Timeline Evaluation{% endblock %}
+
+{% block content %}
+<button id="mobile-menu-toggle" class="btn btn-sm btn-primary d-md-none mb-3">
+  <i data-feather="menu"></i>
+  <span>Menu</span>
+</button>
+
+<div class="header">
+  <h1 class="header-title">Timeline Evaluation</h1>
+  <p class="header-subtitle">
+    Upload ground truth and prediction files to evaluate the timeline extraction and response inference performance.
+  </p>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="btn-group" role="group" aria-label="Navigation Buttons">
+    <a href="{{ url_for('api.timeline') }}" class="btn btn-outline-secondary">Timeline Extraction</a>
+    <a href="{{ url_for('api.timeline_evaluation') }}" class="btn btn-outline-secondary active">Timeline Evaluation</a>
+  </div>
+
+  <a href="#" id="download-eval" class="btn btn-primary btn-sm">
+    <i class="fa fa-download"></i> ⬇️Download Results
+  </a>
+</div>
+
+<div id="alert-container"></div>
+
+<!-- Upload panel -->
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="card-header-title mb-0">Evaluation Data</h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <!-- LEFT upload -->
+      <div class="col-md-6 mb-3">
+        <label for="pred-input" class="form-label">Predictions File (CSV or XLSX)</label>
+        <div id="dropzone-pred" class="dropzone">
+          <div class="dropzone-icon"><i data-feather="file-text" width="48" height="48"></i></div>
+          <h5 class="dropzone-message">Drag &amp; drop your file here</h5>
+          <p class="dropzone-description">or click to browse</p>
+          <input id="pred-input" type="file" class="d-none" accept=".csv,.xlsx" />
+        </div>
+      </div>
+
+      <!-- RIGHT upload -->
+      <div class="col-md-6 mb-3">
+        <label for="gt-input" class="form-label">Ground Truth File (CSV or XLSX)</label>
+        <div id="dropzone-gt" class="dropzone">
+          <div class="dropzone-icon"><i data-feather="file" width="48" height="48"></i></div>
+          <h5 class="dropzone-message">Drag &amp; drop your file here</h5>
+          <p class="dropzone-description">or click to browse</p>
+          <input id="gt-input" type="file" class="d-none" accept=".csv,.xlsx" />
+        </div>
+      </div>
+    </div>
+
+    <div class="text-right mt-3">
+      <button id="evaluate-button" class="btn btn-primary">Evaluate Predictions</button>
+    </div>
+
+    <!-- Models comparison -->
+    <hr class="my-4">
+    <div class="row">
+      <div class="col-12">
+        <label class="form-label">Compare Models (upload 2–4 evaluation .xlsx files)</label>
+        <div id="dropzone-models" class="dropzone">
+          <div class="dropzone-icon"><i data-feather="bar-chart-2" width="48" height="48"></i></div>
+          <h5 class="dropzone-message">Drag &amp; drop up to 4 files here</h5>
+          <p class="dropzone-description">or click to browse</p>
+          <input id="models-input" type="file" class="d-none" accept=".xlsx" multiple />
+        </div>
+        <div class="text-right mt-3">
+          <button id="evaluate-models-button" class="btn btn-primary">Compare Models</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="eval-loading-spinner" class="spinner-container d-none">
+  <div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>
+  <p class="mt-2">Evaluating predictions...</p>
+</div>
+
+<div id="eval-results-section" class="d-none">
+
+  <!-- Timeline overall -->
+  <div class="card mb-4">
+    <div class="card-header"><h5 class="card-header-title mb-0">Timeline Evaluation: Overall Metrics</h5></div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="thead-light">
+            <tr><th>Metrics</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th></tr>
+          </thead>
+          <tbody id="overall-avg-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline per event -->
+  <div class="card mb-4">
+    <div class="card-header"><h5 class="card-header-title mb-0">Timeline Evaluation: per Event Metrics</h5></div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0" id="per-event-table">
+          <thead class="thead-light">
+            <tr>
+              <th>Event</th>
+              <th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline chart -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="card-header-title mb-0">Timeline Evaluation: per Event visualization</h5>
+      <select id="metric-select" class="custom-select custom-select-sm" style="width:auto;">
+        <option value="f1">F1-Score</option><option value="accuracy">Accuracy</option>
+        <option value="precision">Precision</option><option value="recall">Recall</option>
+      </select>
+    </div>
+    <div class="card-body d-flex justify-content-center">
+      <div id="chart-wrapper" style="max-width: 900px; width: 100%;">
+        <canvas id="per-event-chart" height="140"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECIST overall -->
+  <div class="card mb-4">
+    <div class="card-header"><h5 class="card-header-title mb-0">RECIST Evaluation: Overall Metrics</h5></div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="thead-light">
+            <tr><th>Metric</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th></tr>
+          </thead>
+          <tbody id="recist-summary"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECIST per-class -->
+  <div class="card mb-4">
+    <div class="card-header"><h5 class="card-header-title mb-0">RECIST Evaluation: per Label Metrics</h5></div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="thead-light">
+            <tr><th>Label</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th></tr>
+          </thead>
+          <tbody id="recist-perclass"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECIST matrix -->
+  <div class="card mb-4">
+    <div class="card-header"><h5 class="card-header-title mb-0">RECIST Evaluation: Confusion Matrix</h5></div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <div id="recist-matrix"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Models -->
+<div id="models-results-section" class="d-none">
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="card-header-title mb-0">Performance Visualization across Models</h5>
+      <select id="models-metric-select" class="custom-select custom-select-sm" style="width:auto;">
+        <option value="f1">F1-Score</option><option value="accuracy">Accuracy</option>
+        <option value="precision">Precision</option><option value="recall">Recall</option>
+      </select>
+    </div>
+    <div class="card-body"><div id="models-heatmap"></div></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.3.0/dist/chartjs-chart-matrix.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="{{ url_for('static', filename='js/timeline_evaluation.js') }}"></script>
+<script>document.addEventListener("DOMContentLoaded", function () { feather.replace(); });</script>
+{% endblock %}

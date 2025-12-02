@@ -1,0 +1,109 @@
+feature,value,label,precision,recall,f1-score,support
+dosage,osimertinib | 80 mg,osimertinib + 80 mg,0.5,0.143,0.222,8
+dosage,gefitinib | None,gefitinib + None,0.0,0.0,0.0,3
+dosage,erlotinib | 150 mg,erlotinib + 150 mg,0.0,0.0,0.0,2
+dosage,gefitinib | 250 mg,gefitinib + 250 mg,0.0,0.0,0.0,4
+dosage,afatinib | None,afatinib + None,0.0,0.0,0.0,1
+dosage,afatinib | 80 mg,afatinib + 80 mg,0.0,0.0,0.0,2
+dosage,afatinib | 40 mg,afatinib + 40 mg,0.0,0.0,0.0,1
+dosage,gefitinib | 80 mg,gefitinib + 80 mg,1.0,0.5,0.667,2
+dosage,erlotinib | 100 mg,erlotinib + 100 mg,0.0,0.0,0.0,1
+dosage,Osimertinib | 80 mg,Osimertinib + 80 mg,0.5,0.143,0.222,8
+dosage,gefinitib | 250 mg,gefinitib + 250 mg,0.0,0.0,0.0,1
+dosage,cisplatino | None,cisplatino + None,0.0,0.0,0.0,1
+dosage,Afatinib | 80 mg,Afatinib + 80 mg,0.0,0.0,0.0,2
+dosage,ceftriaxone | None,ceftriaxone + None,0.0,0.0,0.0,1
+dosage,Gefitinib | 250 mg,Gefitinib + 250 mg,0.0,0.0,0.0,4
+dosage,erlotinib | AUC4,erlotinib + AUC4,0.0,0.0,0.0,1
+frequency,osimertinib | 1 cp die,osimertinib + 1 cp die,0.0,0.0,0.0,1
+frequency,gefitinib | None,gefitinib + None,0.0,0.0,0.0,2
+frequency,osimertinib | qd,osimertinib + qd,0.0,0.0,0.0,5
+frequency,erlotinib | qd,erlotinib + qd,0.0,0.0,0.0,2
+frequency,gefitinib | 1 cp/die,gefitinib + 1 cp/die,0.0,0.0,0.0,1
+frequency,gefitinib | qd,gefitinib + qd,0.0,0.0,0.0,3
+frequency,afatinib | None,afatinib + None,0.0,0.0,0.0,1
+frequency,afatinib | 1 cp die,afatinib + 1 cp die,0.0,0.0,0.0,2
+frequency,osimertinib | 80 mg/die,osimertinib + 80 mg/die,1.0,1.0,1.0,1
+frequency,afatinib | qd,afatinib + qd,0.0,0.0,0.0,1
+frequency,gefitinib | 80 mg/die,gefitinib + 80 mg/die,1.0,1.0,1.0,1
+frequency,gefitinib | 1 cp al giorno,gefitinib + 1 cp al giorno,0.0,0.0,0.0,2
+frequency,erlotinib | None,erlotinib + None,1.0,1.0,1.0,1
+frequency,Osimertinib | 1 compressa al giorno,Osimertinib + 1 compressa al giorno,0.0,0.0,0.0,1
+frequency,gefinitib | 250 mg/die,gefinitib + 250 mg/die,0.0,0.0,0.0,1
+frequency,cisplatino | None,cisplatino + None,0.0,0.0,0.0,1
+frequency,Afatinib | 1 cp die,Afatinib + 1 cp die,0.0,0.0,0.0,2
+frequency,ceftriaxone | None,ceftriaxone + None,0.0,0.0,0.0,1
+frequency,Gefitinib | 1 cp al giorno,Gefitinib + 1 cp al giorno,0.0,0.0,0.0,2
+period,osimertinib | None,osimertinib + None,0.5,0.143,0.222,8
+period,gefitinib | None,gefitinib + None,0.0,0.0,0.0,9
+period,erlotinib | 9 cicli,erlotinib + 9 cicli,0.0,0.0,0.0,1
+period,afatinib | None,afatinib + None,0.0,0.0,0.0,4
+period,erlotinib | None,erlotinib + None,1.0,0.5,0.667,2
+period,Osimertinib | None,Osimertinib + None,0.5,0.143,0.222,8
+period,gefinitib | None,gefinitib + None,0.0,0.0,0.0,1
+period,cisplatino | None,cisplatino + None,0.0,0.0,0.0,1
+period,Afatinib | None,Afatinib + None,0.0,0.0,0.0,4
+period,ceftriaxone | None,ceftriaxone + None,0.0,0.0,0.0,1
+period,gefitinib | 3 cycles,gefitinib + 3 cycles,0.0,0.0,0.0,1
+period,Gefitinib | None,Gefitinib + None,0.0,0.0,0.0,9
+mutation,osimertinib | Exon 19 del,osimertinib + Exon 19 del,0.0,0.0,0.0,3
+mutation,gefitinib | Exon 19 del,gefitinib + Exon 19 del,0.0,0.0,0.0,3
+mutation,osimertinib | L858R,osimertinib + L858R,0.0,0.0,0.0,3
+mutation,erlotinib | exon 19 del,erlotinib + exon 19 del,0.0,0.0,0.0,1
+mutation,gefitinib | L861Q,gefitinib + L861Q,0.0,0.0,0.0,1
+mutation,gefitinib | altre mutazioni,gefitinib + altre mutazioni,0.0,0.0,0.0,2
+mutation,afatinib | exon 19 del,afatinib + exon 19 del,0.0,0.0,0.0,1
+mutation,gefitinib | L858R,gefitinib + L858R,0.0,0.0,0.0,2
+mutation,afatinib | T790M,afatinib + T790M,0.0,0.0,0.0,2
+mutation,osimertinib | altre mutazioni,osimertinib + altre mutazioni,0.0,0.0,0.0,1
+mutation,erlotinib | L858R,erlotinib + L858R,0.0,0.0,0.0,2
+mutation,Osimertinib | None,Osimertinib + None,0.0,0.0,0.0,1
+mutation,gefinitib | L861Q,gefinitib + L861Q,0.0,0.0,0.0,1
+mutation,cisplatino | None,cisplatino + None,0.0,0.0,0.0,1
+mutation,Afatinib | L861Q,Afatinib + L861Q,0.0,0.0,0.0,1
+mutation,osimertinib | G719C+E709K,osimertinib + G719C+E709K,0.0,0.0,0.0,1
+mutation,ceftriaxone | None,ceftriaxone + None,0.0,0.0,0.0,1
+mutation,gefitinib | T790M,gefitinib + T790M,0.0,0.0,0.0,1
+mutation,Gefitinib | None,Gefitinib + None,0.0,0.0,0.0,1
+mutation,erlotinib | L858R+L858R,erlotinib + L858R+L858R,0.0,0.0,0.0,1
+exon,osimertinib | esone 19,osimertinib + esone 19,0.0,0.0,0.0,3
+exon,gefitinib | esone 19,gefitinib + esone 19,0.0,0.0,0.0,4
+exon,osimertinib | esone 21,osimertinib + esone 21,0.0,0.0,0.0,3
+exon,erlotinib | esone 19,erlotinib + esone 19,0.0,0.0,0.0,1
+exon,gefitinib | None,gefitinib + None,0.0,0.0,0.0,3
+exon,afatinib | esone 19,afatinib + esone 19,0.0,0.0,0.0,2
+exon,gefitinib | esone 21,gefitinib + esone 21,0.0,0.0,0.0,2
+exon,afatinib | None,afatinib + None,0.0,0.0,0.0,1
+exon,osimertinib | esone 18,osimertinib + esone 18,1.0,1.0,1.0,1
+exon,erlotinib | 	esone 21,erlotinib + 	esone 21,0.0,0.0,0.0,1
+exon,erlotinib | esone 21,erlotinib + esone 21,1.0,1.0,1.0,1
+exon,Osimertinib | None,Osimertinib + None,0.0,0.0,0.0,1
+exon,gefinitib | esone 21,gefinitib + esone 21,0.0,0.0,0.0,1
+exon,cisplatino | None,cisplatino + None,0.0,0.0,0.0,1
+exon,Afatinib | esone 21,Afatinib + esone 21,0.0,0.0,0.0,1
+exon,ceftriaxone | None,ceftriaxone + None,0.0,0.0,0.0,1
+exon,gefitinib | esone 20,gefitinib + esone 20,0.0,0.0,0.0,1
+exon,Gefitinib | None,Gefitinib + None,0.0,0.0,0.0,3
+modality,osimertinib | None,osimertinib + None,0.0,0.0,0.0,8
+modality,gefitinib | None,gefitinib + None,0.5,0.143,0.222,8
+modality,erlotinib | orale,erlotinib + orale,0.0,0.0,0.0,1
+modality,gefitinib | orale,gefitinib + orale,0.0,0.0,0.0,1
+modality,afatinib | None,afatinib + None,0.0,0.0,0.0,3
+modality,erlotinib | None,erlotinib + None,1.0,0.5,0.667,2
+modality,Osimertinib | None,Osimertinib + None,0.0,0.0,0.0,8
+modality,gefinitib | orale,gefinitib + orale,0.0,0.0,0.0,1
+modality,cisplatino | endovenosa,cisplatino + endovenosa,0.0,0.0,0.0,1
+modality,Afatinib | orale,Afatinib + orale,0.0,0.0,0.0,1
+modality,osimertinib | orale,osimertinib + orale,0.0,0.0,0.0,1
+modality,ceftriaxone | endovenosa,ceftriaxone + endovenosa,0.0,0.0,0.0,1
+modality,Gefitinib | None,Gefitinib + None,0.5,0.143,0.222,8
+is_tki,osimertinib | True,osimertinib + True,0.5,0.143,0.222,8
+is_tki,gefitinib | True,gefitinib + True,0.5,0.125,0.2,9
+is_tki,erlotinib | True,erlotinib + True,1.0,0.333,0.5,3
+is_tki,afatinib | True,afatinib + True,0.0,0.0,0.0,4
+is_tki,Osimertinib | True,Osimertinib + True,0.5,0.143,0.222,8
+is_tki,gefinitib | False,gefinitib + False,0.0,0.0,0.0,1
+is_tki,cisplatino | False,cisplatino + False,0.0,0.0,0.0,1
+is_tki,Afatinib | True,Afatinib + True,0.0,0.0,0.0,4
+is_tki,ceftriaxone | False,ceftriaxone + False,0.0,0.0,0.0,1
+is_tki,Gefitinib | True,Gefitinib + True,0.5,0.125,0.2,9

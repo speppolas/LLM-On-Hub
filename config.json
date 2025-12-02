@@ -1,6 +1,6 @@
 {
     "LLM_MODEL": "llama3.1:8b-custom",
-    "LLM_CONTEXT_SIZE": 12288,
-    "LLM_TEMPERATURE": 0.11,
+    "LLM_CONTEXT_SIZE": 8192,
+    "LLM_TEMPERATURE": 0,
     "TRIAL_MATCHING_BATCH_SIZE": 4
 }

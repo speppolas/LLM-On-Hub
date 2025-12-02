@@ -1,11 +1,6 @@
-<!-- templates/index.html -->
-
-
-
-
 {% extends "base.html" %}
 
-{% block title %}MedMatchINT - Clinical Trial Matching{% endblock %}
+{% block title %}LLM-On-Hub - Clinical Trial Matching{% endblock %}
 
 {% block content %}
 <button id="mobile-menu-toggle" class="btn btn-sm btn-primary d-md-none mb-3">
@@ -18,49 +13,44 @@
   <p class="header-subtitle">Upload patient data to find matching clinical trials</p>
 </div>
 
-<!-- Navigation to new pages -->
-<div class="mb-4">
-  <div class="btn-group" role="group" aria-label="Navigation Buttons">
-  <a href="{{ url_for('api.timeline') }}" class="btn btn-outline-secondary">Timeline Extraction</a>
-  <a href="{{ url_for('api.medications') }}" class="btn btn-outline-secondary">Medications</a>
-
-  </div>
-</div>
-
-
 <div id="alert-container"></div>
 
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="card-header-title mb-0">Patient Data</h5>
     <div class="btn-group" role="group">
-      <button id="file-input-toggle" class="btn btn-sm btn-primary active">PDF Upload</button>
+      <button id="file-input-toggle" class="btn btn-sm btn-primary active">File Upload</button>
       <button id="text-input-toggle" class="btn btn-sm btn-outline-primary">Text Input</button>
     </div>
   </div>
 
   <div class="card-body">
-    <!-- File upload section -->
+    <!-- File Upload Section -->
     <div id="file-input-section">
       <div id="dropzone" class="dropzone">
         <div class="dropzone-icon">
           <i data-feather="file-text" width="48" height="48"></i>
         </div>
-        <h5 class="dropzone-message">Drag & drop your PDF file here</h5>
+        <h5 class="dropzone-message">Drag & drop your file here</h5>
         <p class="dropzone-description">or click to browse files</p>
         <input id="file-input" type="file" class="d-none" accept=".pdf" />
       </div>
     </div>
 
-    <!-- Text input section (hidden by default) -->
+    <!-- Text Input Section (Hidden by Default) -->
     <div id="text-input-section" class="d-none">
       <div class="form-group">
         <label for="text-input" class="form-label">Patient Clinical Information</label>
-        <textarea id="text-input" class="form-control" rows="8" placeholder="Enter patient clinical information, including diagnosis, age, gender, ECOG status, mutations, etc."></textarea>
+        <textarea
+          id="text-input"
+          class="form-control"
+          rows="8"
+          placeholder="Enter patient clinical information, including diagnosis, age, gender, ECOG status, mutations, etc."
+        ></textarea>
       </div>
     </div>
 
-    <!-- Control buttons -->
+    <!-- Control Buttons -->
     <div class="text-right mt-3">
       <button id="clear-button" class="btn btn-secondary mr-2">Clear</button>
       <button id="process-button" class="btn btn-primary">Process & Find Matches</button>
@@ -68,7 +58,7 @@
   </div>
 </div>
 
-<!-- Loading spinner -->
+<!-- Loading Spinner -->
 <div id="loading-spinner" class="spinner-container d-none">
   <div class="spinner-border text-primary" role="status">
     <span class="sr-only">Loading...</span>
@@ -76,7 +66,7 @@
   <p class="mt-2">Processing document and finding matches...</p>
 </div>
 
-<!-- Results section -->
+<!-- Results Section -->
 <div id="results-section" class="d-none mt-4">
   <div class="row">
     <div class="col-lg-4 mb-3">
@@ -96,9 +86,29 @@
           <h5 class="card-header-title">Matching Clinical Trials</h5>
         </div>
         <div class="card-body">
-          <div id="matches-container" class="matches-container">
-            <!-- Matches will be displayed here -->
+          <div id="matches-container" class="matches-container"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Evidence Section -->
+  <div class="row mt-3">
+    <div class="col-lg-12 mb-3">
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <h5 class="card-header-title mb-0">Evidence</h5>
+          <div class="btn-group btn-group-sm" role="group">
+            <a id="btn-annotated-pdf" class="btn btn-primary d-none" target="_blank" rel="noopener">
+              <i data-feather="file-text"></i> Annotated PDF
+            </a>
+            <a id="btn-download-pdf" class="btn btn-outline-success d-none" download>
+              <i data-feather="download"></i> Download PDF
+            </a>
           </div>
+        </div>
+        <div class="card-body p-0">
+          <iframe id="annotated-pdf-frame" style="width: 100%; height: 70vh" frameborder="0"></iframe>
         </div>
       </div>
     </div>
@@ -109,7 +119,7 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener("DOMContentLoaded", function () {
     feather.replace();
   });
 </script>

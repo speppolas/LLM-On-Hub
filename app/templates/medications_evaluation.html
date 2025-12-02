@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% block title %}Medications Evaluation{% endblock %}
+{% block content %}
+<button id="mobile-menu-toggle" class="btn btn-sm btn-primary d-md-none mb-3">
+  <i data-feather="menu"></i>
+  <span>Menu</span>
+</button>
+
+<div class="header">
+  <h1 class="header-title">Medications Evaluation</h1>
+  <p class="header-subtitle">Upload ground truth and prediction files to evaluate the medication extraction performance.
+  </p>
+</div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="btn-group" role="group" aria-label="Navigation Buttons">
+    <a href="{{ url_for('api.medications') }}"
+      class="btn btn-outline-secondary {% if request.endpoint == 'api.medications' %}active{% endif %}">Medications
+      Extraction</a>
+    <a href="{{ url_for('api.medications_evaluation') }}" class="btn btn-outline-secondary active">Medications
+      Evaluation</a>
+    <a href="{{ url_for('api.medications_multi_evaluation') }}" class="btn btn-outline-secondary">Compare
+      Models</a>
+  </div>
+  {% if med_metrics %}
+  <a href="{{ url_for('static', filename='eval_results.zip') }}" class="btn btn-primary btn-sm" download>
+    <i class="fa fa-download"></i> ⬇️Download Results
+  </a>
+  {% else %}
+  <a href="#" id="download-results" class="btn btn-primary btn-sm">
+    <i class="fa fa-download"></i> ⬇️Download Results
+  </a>
+  {% endif %}
+</div>
+
+<div id="alert-container"></div>
+
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-header-title mb-0">Evaluation Data</h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6 mb-3 mb-md-0">
+        <label for="pred-input" class="form-label">Predictions File (CSV or XLSX)</label>
+        <div id="dropzone-pred" class="dropzone">
+          <div class="dropzone-icon">
+            <i data-feather="file" width="48" height="48"></i>
+          </div>
+          <h5 class="dropzone-message">Drag &amp; drop your file here</h5>
+          <p class="dropzone-description">or click to browse</p>
+          <input id="pred-input" type="file" class="d-none" accept=".csv,.xlsx" />
+        </div>
+      </div>
+      <div class="col-md-6">
+        <label for="gt-input" class="form-label">Ground Truth File (CSV or XLSX)</label>
+        <div id="dropzone-gt" class="dropzone">
+          <div class="dropzone-icon">
+            <i data-feather="file" width="48" height="48"></i>
+          </div>
+          <h5 class="dropzone-message">Drag &amp; drop your file here</h5>
+          <p class="dropzone-description">or click to browse</p>
+          <input id="gt-input" type="file" class="d-none" accept=".csv,.xlsx" />
+        </div>
+      </div>
+    </div>
+    <div class="text-right mt-3">
+      <button id="evaluate-button" class="btn btn-primary">Evaluate</button>
+    </div>
+  </div>
+</div>
+
+<div id="loading-spinner" class="spinner-container d-none">
+  <div class="spinner-border text-primary" role="status">
+    <span class="sr-only">Loading...</span>
+  </div>
+  <p class="mt-2">Evaluating predictions...</p>
+</div>
+{#ACCURACY OVERALL IN STRINGA#}
+<div id="results-section" class="mt-4 {% if not med_metrics %}d-none{% endif %}">
+  {% if summary_metrics %}
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-header-title mb-0">Overall Metrics</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="thead-light">
+            <tr>
+              <th>Metrics</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1-Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Macro avg overall</strong></td>
+              <td>{{ summary_metrics.precision|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.recall|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.f1_score|default(0)|round(4) }}</td>
+            </tr>
+            <tr>
+              <td><strong>Micro avg overall</strong></td>
+              <td>{{ summary_metrics.precision_micro|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.recall_micro|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.f1_micro|default(0)|round(4) }}</td>
+            </tr>
+            <tr>
+              <td><strong>Weighted avg overall</strong></td>
+              <td>{{ summary_metrics.precision_weighted|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.recall_weighted|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.f1_weighted|default(0)|round(4) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {# <!-- 👇 Solo stringa con la accuracy globale -->
+      <div class="px-3 py-2 text-muted small border-top">
+        <strong>Overall Accuracy (micro):</strong>
+        {{ summary_metrics.accuracy_micro|default(0)|round(4) }}
+      </div>
+    </div>
+  </div>
+  {% endif %}#}
+
+
+  <div class="px-3 py-3 border-top">
+    <strong>Overall Accuracy:</strong>
+    {{ (summary_metrics.accuracy_micro * 100)|default(0)|round(2) }}%
+  </div>
+  {% endif %}
+
+
+  {#ACCURACY WEIGHTED MICRO MACRO IN TABELLA#}
+  {# {% if summary_metrics %}
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-header-title mb-0">Overall Metrics</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="thead-light">
+            <tr>
+              <th>Metrics</th>
+              <th>Accuracy</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1-Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Macro avg overall</strong></td>
+              <td>{{ summary_metrics.accuracy|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.precision|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.recall|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.f1_score|default(0)|round(4) }}</td>
+            </tr>
+            <tr>
+              <td><strong>Micro avg overall</strong></td>
+              <td>{{ summary_metrics.accuracy_micro|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.precision_micro|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.recall_micro|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.f1_micro|default(0)|round(4) }}</td>
+            </tr>
+            <tr>
+              <td><strong>Weighted avg overall</strong></td>
+              <td>{{ summary_metrics.accuracy_weighted|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.precision_weighted|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.recall_weighted|default(0)|round(4) }}</td>
+              <td>{{ summary_metrics.f1_weighted|default(0)|round(4) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}#}
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-header-title mb-0">Feature evaluation</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="thead-light">
+            <tr>
+              <th>Feature</th>
+              <th>Accuracy</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1-Score</th>
+              <th>Support</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in med_metrics %}
+            <tr>
+              <td>{{ row.feature }}</td>
+              <td>{{ row.accuracy }}</td>
+              <td>{{ row.precision }}</td>
+              <td>{{ row.recall }}</td>
+              <td>{{ row["f1-score"] }}</td>
+              <td>{{ row.support }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {#GRAFICI SEPARATI#}
+  {# {% if combo_img %}
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-header-title mb-0">F1 Score per Combo</h5>
+    </div>
+    <div class="card-body text-center">
+      <img src="{{ url_for('static', filename=combo_img) }}" class="img-fluid" alt="F1 per Combo chart">
+    </div>
+  </div>
+  {% endif %}
+
+  {% if med_img %}
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-header-title mb-0">F1 Score per Feature Value</h5>
+    </div>
+    <div class="card-body text-center">
+      <img src="{{ url_for('static', filename=med_img) }}" class="img-fluid" alt="F1 per Feature chart">
+    </div>
+  </div>
+  {% endif %}
+
+  {% if acc_img %}
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-header-title mb-0">Accuracy per Feature</h5>
+    </div>
+    <div class="card-body text-center">
+      <img src="{{ url_for('static', filename=acc_img) }}" class="img-fluid" alt="Accuracy per Feature chart">
+    </div>
+  </div>
+  {% endif %}
+
+  {% if prec_img %}
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-header-title mb-0">Precision per Feature</h5>
+    </div>
+    <div class="card-body text-center">
+      <img src="{{ url_for('static', filename=prec_img) }}" class="img-fluid" alt="Precision per Feature chart">
+    </div>
+  </div>
+  {% endif %}
+
+  {% if rec_img %}
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-header-title mb-0">Recall per Feature</h5>
+    </div>
+    <div class="card-body text-center">
+      <img src="{{ url_for('static', filename=rec_img) }}" class="img-fluid" alt="Recall per Feature chart">
+    </div>
+  </div>
+  {% endif %}
+</div> <!-- fine results-section -->
+{% endblock %} #}
+
+{# === ONE-CARD CHART SELECTOR (like Timeline) === #}
+{# === ONE-CARD CHART SELECTOR (like Timeline) === #}
+{% if med_img or acc_img or prec_img or rec_img %}
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="card-header-title mb-0">Feature Performance Visualization</h5>
+    <select id="med-metric-select" class="custom-select custom-select-sm" style="width:auto;">
+      {% if med_img %}<option value="f1" selected>F1-Score</option>{% endif %}
+      {% if acc_img %}<option value="accuracy">Accuracy</option>{% endif %}
+      {% if prec_img %}<option value="precision">Precision</option>{% endif %}
+      {% if rec_img %}<option value="recall">Recall</option>{% endif %}
+    </select>
+  </div>
+  <div class="card-body text-center">
+    <img id="med-metric-img" class="img-fluid" alt="Medications metric chart"
+      data-src-f1="{{ med_img and url_for('static', filename=med_img) or '' }}"
+      data-src-accuracy="{{ acc_img and url_for('static', filename=acc_img) or '' }}"
+      data-src-precision="{{ prec_img and url_for('static', filename=prec_img) or '' }}"
+      data-src-recall="{{ rec_img and url_for('static', filename=rec_img) or '' }}"
+      src="{{ med_img and url_for('static', filename=med_img) or (acc_img and url_for('static', filename=acc_img)) or (prec_img and url_for('static', filename=prec_img)) or (rec_img and url_for('static', filename=rec_img)) or '' }}" />
+  </div>
+</div>
+{% endif %}
+
+{% if heatmap_img %}
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="card-header-title mb-0">Heatmap</h5>
+  </div>
+  <div class="card-body text-center">
+    <img src="{{ url_for('static', filename=heatmap_img) }}" class="img-fluid" alt="Heatmap metrics">
+  </div>
+</div>
+{% endif %}
+
+{% if radar_img %}
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="card-header-title mb-0">Radar Plot</h5>
+  </div>
+  <div class="card-body text-center">
+    <img src="{{ url_for('static', filename=radar_img) }}" class="img-fluid" alt="Radar global metrics">
+  </div>
+</div>
+{% endif %}
+</div> <!-- fine #results-section -->
+
+
+{% endblock %}
+
+
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/evaluation.js') }}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const sel = document.getElementById("med-metric-select");
+    const img = document.getElementById("med-metric-img");
+    if (!sel || !img) return;
+
+    const setSrc = (metric) => {
+      const key = metric === "f1" ? "srcF1" : `src${metric.charAt(0).toUpperCase()}${metric.slice(1)}`;
+      // mappa dagli attributi data-*
+      const map = {
+        srcF1: img.getAttribute("data-src-f1"),
+        srcAccuracy: img.getAttribute("data-src-accuracy"),
+        srcPrecision: img.getAttribute("data-src-precision"),
+        srcRecall: img.getAttribute("data-src-recall"),
+      };
+      if (map[key]) img.src = map[key];
+    };
+
+    // inizializza in base al valore selezionato
+    setSrc(sel.value);
+
+    sel.addEventListener("change", (e) => setSrc(e.target.value));
+
+    // feather icons
+    if (window.feather) { feather.replace(); }
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    feather.replace();
+  });
+</script>
+{% endblock %}

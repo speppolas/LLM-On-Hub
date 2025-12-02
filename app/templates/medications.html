@@ -1,10 +1,4 @@
-
-
-
-{% extends "base.html" %}
-
-{% block title %}Medication Extraction{% endblock %}
-
+{% extends "base.html" %} {% block title %}Medication Extraction{% endblock %}
 {% block content %}
 <button id="mobile-menu-toggle" class="btn btn-sm btn-primary d-md-none mb-3">
   <i data-feather="menu"></i>
@@ -16,15 +10,25 @@
   <p class="header-subtitle">Upload patient records to extract medications</p>
 </div>
 
-<!-- Navigation to new pages -->
-<div class="mb-4">
+<!-- cambiare i bottoni -->
+<!-- Navigation -->
+<div class="d-flex justify-content-between align-items-center mb-4">
   <div class="btn-group" role="group" aria-label="Navigation Buttons">
-  <a href="{{ url_for('api.timeline') }}" class="btn btn-outline-secondary">Timeline Extraction</a>
-  <a href="{{ url_for('api.medications') }}" class="btn btn-outline-secondary">Medications</a>
-
+    <a href="{{ url_for('api.medications') }}" class="btn btn-outline-secondary active">Medications Extraction</a>
+    <a href="{{ url_for('api.medications_evaluation') }}"
+      class="btn btn-outline-secondary {% if request.endpoint == 'api.medications_evaluation' %}active{% endif %}">
+      Medications Evaluation
+    </a>
+    <a href="{{ url_for('api.medications_multi_evaluation') }}"
+      class="btn btn-outline-secondary {% if request.endpoint == 'api.medications_evaluation' %}active{% endif %}">
+      Compare Models
+    </a>
   </div>
-</div>
 
+  <a href="#" id='download-results' class="btn btn-primary btn-sm">
+    <i class="fa fa-download"></i> ⬇️Download Results
+  </a>
+</div>
 
 <div id="alert-container"></div>
 
@@ -32,8 +36,9 @@
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="card-header-title mb-0">Patient Data</h5>
     <div class="btn-group" role="group">
-      <button id="file-input-toggle" class="btn btn-sm btn-primary active">PDF Upload</button>
-      <button id="text-input-toggle" class="btn btn-sm btn-outline-primary">Text Input</button>
+      <button id="file-input-toggle" class="btn btn-sm btn-primary active">
+        File Upload
+      </button>
     </div>
   </div>
 
@@ -44,24 +49,20 @@
         <div class="dropzone-icon">
           <i data-feather="file-text" width="48" height="48"></i>
         </div>
-        <h5 class="dropzone-message">Drag & drop your PDF file here</h5>
+        <h5 class="dropzone-message">Drag & drop your file here</h5>
         <p class="dropzone-description">or click to browse files</p>
-        <input id="file-input" type="file" class="d-none" accept=".pdf" />
+        <input id="file-input" type="file" class="d-none" accept=".xlsx,.csv" multiple />
       </div>
     </div>
 
-    <!-- Text input section (hidden by default) -->
-    <div id="text-input-section" class="d-none">
-      <div class="form-group">
-        <label for="text-input" class="form-label">Patient Clinical Information</label>
-        <textarea id="text-input" class="form-control" rows="8" placeholder="Enter patient clinical information, including diagnosis, age, gender, ECOG status, mutations, etc."></textarea>
-      </div>
-    </div>
+
 
     <!-- Control buttons -->
     <div class="text-right mt-3">
       <button id="clear-button" class="btn btn-secondary mr-2">Clear</button>
-      <button id="process-button" class="btn btn-primary">Process & Find Matches</button>
+      <button id="process-button" class="btn btn-primary">
+        Process Medications
+      </button>
     </div>
   </div>
 </div>
@@ -71,43 +72,24 @@
   <div class="spinner-border text-primary" role="status">
     <span class="sr-only">Loading...</span>
   </div>
-  <p class="mt-2">Processing document and finding matches...</p>
+  <p class="mt-2">Extracting medications...</p>
 </div>
 
 <!-- Results section -->
 <div id="results-section" class="d-none mt-4">
-  <div class="row">
-    <div class="col-lg-4 mb-3">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="card-header-title">Extracted Features</h5>
-        </div>
-        <div class="card-body p-3">
-          <div id="features-container" class="features-container"></div>
-        </div>
-      </div>
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-header-title">Extracted Medications</h5>
     </div>
-
-    <div class="col-lg-8 mb-3">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="card-header-title">Matching Clinical Trials</h5>
-        </div>
-        <div class="card-body">
-          <div id="matches-container" class="matches-container">
-            <!-- Matches will be displayed here -->
-          </div>
-        </div>
-      </div>
+    <div class="card-body p-3">
+      <div id="features-container" class="features-container"></div>
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/medications.js') }}"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener("DOMContentLoaded", function () {
     feather.replace();
   });
 </script>

@@ -1,0 +1,51 @@
+{
+  "medication": {
+    "accuracy": 0.16666666666666666,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "support": 42
+  },
+  "dosage": {
+    "accuracy": 0.5952380952380952,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "support": 42
+  },
+  "frequency": {
+    "accuracy": 0.8095238095238095,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "support": 42
+  },
+  "period": {
+    "accuracy": 0.9047619047619048,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "support": 42
+  },
+  "mutation": {
+    "accuracy": 0.023809523809523808,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "support": 42
+  },
+  "exon": {
+    "accuracy": 0.16666666666666666,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "support": 42
+  },
+  "modality": {
+    "accuracy": 0.7857142857142857,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "support": 42
+  }
+}

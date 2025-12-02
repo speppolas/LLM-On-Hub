@@ -1,0 +1,27 @@
+{
+  "accuracy": 0.5,
+  "n_records": 2,
+  "features_used": [
+    "dosage",
+    "exon",
+    "frequency",
+    "medication",
+    "modality",
+    "mutation",
+    "period"
+  ],
+  "by_id": [
+    {
+      "id": "127232::erlotinib",
+      "exact_match": 0,
+      "n_mismatches": 2,
+      "mismatched_fields": "exon: GT='esone 19' | PRED='none'; mutation: GT='exon 19 del' | PRED='none'"
+    },
+    {
+      "id": "127232::osimertinib",
+      "exact_match": 1,
+      "n_mismatches": 0,
+      "mismatched_fields": ""
+    }
+  ]
+}

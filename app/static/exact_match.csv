@@ -1,0 +1,3 @@
+id,exact_match,n_mismatches,mismatched_fields
+127232::erlotinib,0,2,exon: GT='esone 19' | PRED='none'; mutation: GT='exon 19 del' | PRED='none'
+127232::osimertinib,1,0,

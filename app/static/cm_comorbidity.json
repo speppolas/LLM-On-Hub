@@ -1,0 +1,73 @@
+{
+  "labels": [
+    "diabete mellito, ectasia dell'aorta ascendente, adenocarcinoma polmonare egfr mutato (esone 19), embolia polmonare, ipertensione arteriosa, iperglicemia, pleurite",
+    "diabetes mellitus, hypertension, aneurisma aortico",
+    "iptrofia prostatica benigna,sindrome di gilbert (dalla nascita),riscontro di tampone positivo per covid19 ad inizio dicembre",
+    "sindrome di gilbert (dalla nascita),ipertrofia prostatica benigna dal 2014,tonsillectomia dall'età di 7 aa,asportazione di osteofita piede sinistro"
+  ],
+  "matrix": [
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      2
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "report": {
+    "diabete mellito, ectasia dell'aorta ascendente, adenocarcinoma polmonare egfr mutato (esone 19), embolia polmonare, ipertensione arteriosa, iperglicemia, pleurite": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "diabetes mellitus, hypertension, aneurisma aortico": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 1.0
+    },
+    "iptrofia prostatica benigna,sindrome di gilbert (dalla nascita),riscontro di tampone positivo per covid19 ad inizio dicembre": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "sindrome di gilbert (dalla nascita),ipertrofia prostatica benigna dal 2014,tonsillectomia dall'età di 7 aa,asportazione di osteofita piede sinistro": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "accuracy": 0.0,
+    "macro avg": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "weighted avg": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    }
+  }
+}
