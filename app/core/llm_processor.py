@@ -24,9 +24,9 @@ def load_config():
     import os
     import json
 
-    # Base directory: llm_processor.py is inside app/core/
+    # llm_processor.py is inside app/core/, so go up to app/ and into api/
     base_dir = os.path.dirname(os.path.dirname(__file__))  # -> app/
-    config_path = os.path.join(base_dir, "routes", "config.json")
+    config_path = os.path.join(base_dir, "api", "config.json")
 
     try:
         if os.path.exists(config_path):
@@ -62,8 +62,25 @@ class LLMProcessor:
         self.max_tokens = min(self.context_size - 512, self.context_size // 2)
 
     def generate_response(self, prompt: str, temperature: float = None, max_tokens: int = None) -> str:
+        # 🔥 Reload config EVERY TIME
+        cfg = load_config()
+        self.model = cfg.get("LLM_MODEL", self.model)
+        self.context_size = cfg.get("LLM_CONTEXT_SIZE", self.context_size)
+        self.temperature = cfg.get("LLM_TEMPERATURE", self.temperature)
+        self.max_tokens = min(self.context_size - 512, self.context_size // 2)
+
+        print(f"[LLM] Using model={self.model}, ctx={self.context_size}, temp={self.temperature}")
+
         temperature = temperature if temperature is not None else self.temperature
         max_tokens = max_tokens if max_tokens is not None else self.max_tokens
+
+        # -------------------------------------------------------
+        # 🔍 DEBUG: PRINT THE FULL PROMPT SENT TO THE MODEL
+        # -------------------------------------------------------
+        print("\n================ PROMPT SENT TO MODEL ================")
+        print(prompt)
+        print("================ END PROMPT ==========================\n")
+
         try:
             payload = {
                 "model": self.model,
@@ -73,6 +90,7 @@ class LLMProcessor:
                 "max_tokens": max_tokens,
                 "stream": False
             }
+
             # print(f"Sending request to Ollama API with payload: {payload}")
             response = requests.post(self.api_url, json=payload)
             print(f"Ollama API response status: {response.status_code}")
@@ -133,6 +151,16 @@ class LLMProcessorTM:
 
         temp = self.temperature if temperature is None else float(temperature)
         num_predict = self.max_tokens if max_tokens is None else int(max_tokens)
+
+        # 🔥 Reload config before each inference
+        cfg = load_config()
+        self.model = cfg.get("LLM_MODEL", self.model)
+        self.context_size = int(cfg.get("LLM_CONTEXT_SIZE", self.context_size))
+        self.temperature = float(cfg.get("LLM_TEMPERATURE", self.temperature))
+        self.max_tokens = max(256, min(self.context_size - 512, self.context_size // 2))
+
+        print(f"[LLM-TM] Using model={self.model}, ctx={self.context_size}, temp={self.temperature}")
+
 
         payload = {
             "model": self.model,

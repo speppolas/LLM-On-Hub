@@ -1,3 +1,11 @@
 id,exact_match,n_mismatches,mismatched_fields
-127232::erlotinib,0,2,exon: GT='esone 19' | PRED='none'; mutation: GT='exon 19 del' | PRED='none'
-127232::osimertinib,1,0,
+159493::gefitinib,0,1,mutation: GT='l861q' | PRED='l861q+altre mutazioni'
+182694::afatinib,0,3,exon: GT='none' | PRED='esone 19'; frequency: GT='none' | PRED='1 cp/die'; mutation: GT='none' | PRED='exon 19 del+altre mutazioni'
+266849::osimertinib,0,2,exon: GT='esone 18' | PRED='none'; mutation: GT='e709k+g719c' | PRED='none'
+527765::osimertinib,0,2,exon: GT='esone 19' | PRED='none'; mutation: GT='exon 19 del+t790m' | PRED='t790m'
+537372::gefitinib,1,0,
+589681::erlotinib,0,1,frequency: GT='none' | PRED='1 cp/die'
+589681::gefitinib,0,1,mutation: GT='l858r' | PRED='l858r+altre mutazioni'
+7146748::erlotinib,0,2,exon: GT='esone 19' | PRED='esone 19+esone 20+esone 5'; mutation: GT='exon 19 del' | PRED='l861q'
+8509200::gefitinib,0,1,mutation: GT='none' | PRED='altre mutazioni'
+9233303::osimertinib,0,2,exon: GT='esone 19' | PRED='esone 21'; frequency: GT='1 cp/die' | PRED='80 mg/die'

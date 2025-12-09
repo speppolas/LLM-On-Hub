@@ -1,0 +1,139 @@
+PROMPT UNICO
+
+Sei un oncologo toracico e ricevi un documento contenente la storia clinica di un paziente affetto da tumore al polmone.
+Leggi il documento che segue riga per riga e comprendi la storia clinica del paziente; identifica i seguenti eventi:
+1. Diagnosi
+2. Linee di trattamento
+3. Biopsie
+4. TAC/TC
+5. Discontinuità nella malattia
+
+
+
+
+
+PROMPT_A_LINES = r'''
+Sei un oncologo toracico e ricevi un documento contenente la storia clinica di un paziente affetto da tumore al polmone.
+Esegui con cura i seguenti compiti, nell'ordine:
+
+1. Leggi il documento che segue riga per riga e comprendi la storia clinica del paziente
+2. Fermati ogni volta che viene nominato un nuovo farmaco: Gefitinib, Erlotinib, Osimertinib, Afatinib o Poziotinib (non inventare mensioni se non vengono nominati)
+3. In corrispondenza di questa menzione, recupera la data annessa, e associa una linea di trattamento (in ordine: I, II, III). Se l'anno non è specificato per quella esatta data, deducilo dalle date circostanti.
+4. Raggiunta la III linea fermati. Ciò che viene dopo è irrilevante.
+
+Vincoli:
+- Aggiustamenti di dose o mantenimento con lo stesso farmaco NON determinano una nuova linea.
+- Sicuramente nel documento è presente l'avvio della I linea, ma la II e III linea è probabile che manchino. In questo caso, NON inventarle e NON riportarle.
+- Per ogni linea, esiste UNA SOLA (o zero in caso di II e III linea mancanti) data associata, dunque il tuo JSON conterrà AL MASSIMO 3 tuple (linea, data).
+
+Rispondi SOLO con un oggetto JSON:
+{
+  "lines": [
+    {"line":"I|II|III", "date_raw":"string",
+     "evidence":{"quote":"<=160c", "char_start":0, "char_end":0},
+     "confidence":"high|medium|low"}
+  ],
+  "third_line":{"present":true|false, "char_start":0, "date_raw":"string|null",
+                "confidence":"high|medium|low"}
+}
+
+Vincoli: NON normalizzare nè modificare le date. Copiale esattamente come scritte.
+Se non riesci a identificare una data, osserva le date circostanti e prova a dedurla.
+
+Esempio di JSON corretto:
+{
+  "lines": [
+    {"line":"I", "date_raw":"05/06/2014", "evidence":{"quote":"Adeguatamente informata sul piano di cura e sul programma di trattamento con Afatinib, la paziente accetta di partecipare allo studio con Afatinib05/06 - 03/10/2014 terapia con Afatinib all'interno di trial Divisionale."}, "confidence":"high"}
+    {"line":"II", "date_raw":"17/4/2019", "evidence":{"quote":"17/4/2019 - 01/04/2020 Osimertinib"}, "confidence":"high"}
+    {"line":"III", "date_raw":"08/04/2020", "evidence":{"quote":"08/04/2020 - 07/07/2020 CT secondo Carboplatino + Pemetrexed per 4 cicli"}, "confidence":"high"}
+  ],
+  "third_line":{"present":true, "char_start":0, "date_raw":"08/04/2020", "confidence":"high"}
+}
+
+'''
+
+PROMPT_B_CTS_RECIST = r'''
+Sei un oncologo toracico e ricevi un documento contenente la storia clinica di un paziente affetto da tumore al polmone.
+Esegui con cura i seguenti compiti, nell'ordine:
+
+1. Leggi il documento che segue riga per riga e comprendi la storia clinica del paziente
+2. Fermati ogni volta che viene nominata: "TAC" o "TC" (non ci interessano altri esami di imaging come RMN, PET, RX, ecografie...)
+3. In corrispondenza di questa menzione, recupera la data annessa così come è scritta, senza modificarla
+4. Procedi a leggere la descrizione successiva alla menzione ed etichetta la TAC corrente secondo questi criteri:
+    - CR: Scomparsa di tutte le lesioni (tutti i linfonodi prima identificati come patologici devono avere diametro inferiore ai 10 mm), negativizzazione dei marker tumorali sierici
+    - PR: Riduzione della somma dei diametri di tutte le lesioni pari almeno al 30%
+    - PD: Incremento relativo della somma dei diametri di almeno il 20% e in assoluto di almeno 5 mm, comparsa di almeno una nuova lesione, inequivocabile progressione di una lesione non target.
+    - SD: Tutti i casi non appartenenti alle descrizioni precedenti oppure persistenza di una lesione non target oppure marker sierici sopra la norma anche in assenza di lesioni radiologicamente evidenti
+    - NE: Non è possibile classificare la risposta per mancanza di dati
+5. Continua la lettura, ripetendo il procedimento dal punto 2 per TUTTE le TAC che incontri.
+
+Ogni TAC avrà una e una sola response_recist, escluse le tac basali, che non possono essere valutate.
+
+JSON richiesto:
+{
+  "cts":[
+    {"ct_id":"CT001", "date_raw":"string",
+     "evidence":{"quote":"<=160c","char_start":0,"char_end":0},
+     "snippet":"<=350c","anatomy":["torace"],
+     "line_context":"I|II|unknown",
+     "response_recist":"CR|PR|SD|PD|NE",
+     "basis":{"compared_to":"CT000|null","rationale":"<=220c"}}
+  ],
+  "per_line_summary":[
+    {"line":"I","best_response":"CR|PR|SD|PD|NE","first_pd_date_raw":"string|null"},
+    {"line":"II","best_response":"CR|PR|SD|PD|NE","first_pd_date_raw":"string|null"}
+  ]
+}
+
+Vincoli: Verifica che l'evento con la data corrispondente sia presente nel testo, se non è presente, non riportarlo.
+E' richiesta massima precisione nell'identificazione delle date corrette, non modificarle o inventarle per alcun motivo (minimizza Falsi Positivi e Falsi Negativi).
+
+Esempio di JSON corretto:
+{
+  "cts":[
+    {
+  "ct_id": "CT001", "date_raw": "27/02/2019",
+  "evidence": {"quote": "dimensionalmente invariata la nota lesione espansiva del LSS (3.8 x 1 cm)", "char_start": 168, "char_end": 250},
+  "snippet": "TC (27/02/2019): dimensionalmente invariata la nota lesione espansiva del LSS (3.8 x 1 cm); invariato l'ispessimento cortico-pleurico e le alterazioni micronodulari bilaterali; invariate le millimetriche adenopatie residue in paratracheale inferiore; invariate le lesioni ripetitive residue a livello epatico.",
+  "anatomy": ["torace", "fegato", "pleura"],
+  "line_context": I",
+  "response_recist": "SD",
+  "basis": {"compared_to": "CT000", "rationale": "invariata la nota lesione espansiva del LSS; invariate le lesioni residue epatiche"
+  }
+}
+
+    '''
+
+PROMPT_C_OTHER = r'''
+Sei un oncologo toracico e ricevi un documento contenente la storia clinica di un paziente affetto da tumore al polmone.
+Esegui con cura i seguenti compiti, nell'ordine:
+1. Leggi il documento che segue riga per riga e comprendi la storia clinica del paziente
+2. Estrai TUTTI gli eventi relativi a:
+3. Fermati ogni volta che viene nominato uno dei seguenti eventi:
+    - Diagnosi: è sempre una e una sola, spesso si trova all'inizio del documento, ma a volte è mancante. Se non è esplicitamente menzionata, non inventarla)
+    - Biopsia o Agobiopsia: potrebbe essere ripetuta, o potrebbe essere mancante
+    - Discontinuità nella malattia oncologica toracica: spesso mancante, se non è presente, non inventarla
+4. In corrispondenza dell'evento, recupera la data annessa esattamente come è scritta, senza modificarla
+5. Continua la lettura, ripetendo il procediento dal punto 2.
+
+
+Rispondi con un ARRAY JSON, ogni oggetto:
+[{"data":"string","testo":"etichetta evento"}]
+
+Vincoli: Le date devono essere una sottostringa esatta del testo, non modificarle, non inferirle e non inventarle.
+Verifica che l'evento con la data corrispondente sia presente nel testo, se non è presente, non riportarlo.
+Non inventare eventi non menzionati, e non ignorare quelli menzionati.
+E' richiesta massima precisione nell'identificazione delle date corrette, non modificarle o inventarle per alcun motivo (minimizza Falsi Positivi e Falsi Negativi).
+
+Esempio di JSON corretto:
+
+Se il testo è: "03/2014 Comparsa di linfoadenopatia sovraclaveare destra."
+Restituisci: {"data":"03/2014","testo":"Diagnosi"},
+
+Se il testo è: "18/03/2019 Eseguita biopsia di adenopatia sovraclaveare sinistra richiesta caratterizzazione molecolare su tessuto da biopsia"
+Restituisci: {"data":"18/03/2019","testo":"Biopsia o Agobiopsia"},
+
+Se il testo è: "Quadro sostanzialmente invariato rispetto al precedente controllo del 30.11.201714/08/2018 SOSPESA terapia con osimertinib (Tagrisso) 80 mg 1 cp die per neutropenia grave."
+Restituisci: {"data":"14/08/2018","testo":"Discontinuità nella malattia oncologica toracica"}
+
+'''

@@ -1,9 +1,9 @@
 // ESTRAZIONE DA PIU’ DOCS: DATA E TESTO (e RECIST per TC), NO DETAIL (Excel → per-row streaming)
 document.addEventListener('DOMContentLoaded', () => {
-  const dropzone       = document.getElementById('dropzone');
-  const fileInput      = document.getElementById('file-input');
-  const clearButton    = document.getElementById('clear-button');
-  const processButton  = document.getElementById('process-button');
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('file-input');
+  const clearButton = document.getElementById('clear-button');
+  const processButton = document.getElementById('process-button');
   const resultsSection = document.getElementById('results-section');
 
   // Create a new host AFTER the "Risultati" card so each ID appears on the page background
@@ -19,9 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // From here on, use this as the container for per-ID "islands"
   let featuresContainer = islandsHost;
 
-  const spinnerHost    = document.getElementById('loading-spinner'); // empty host in the layout
+  const spinnerHost = document.getElementById('loading-spinner'); // empty host in the layout
   const alertContainer = document.getElementById('alert-container');
-  const downloadBtn    = document.getElementById('download-results');
+  const downloadBtn = document.getElementById('download-results');
 
   // Button label fix
   if (processButton) processButton.textContent = 'Process Timeline';
@@ -36,14 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
   while (spinnerHost.firstChild) spinnerHost.removeChild(spinnerHost.firstChild);
   spinnerHost.classList.add('d-none');
   spinnerHost.style.display = 'none';
-  spinnerHost.classList.add('d-flex','flex-column','align-items-center','mb-4','text-center');
+  spinnerHost.classList.add('d-flex', 'flex-column', 'align-items-center', 'mb-4', 'text-center');
 
   let selectedFiles = [];
 
   // Lazy-created spinner bits
   let spinnerIconEl = null;
-  let statusLineEl  = null;
-  let timerLineEl   = null;
+  let statusLineEl = null;
+  let timerLineEl = null;
 
   function createSpinnerUI() {
     if (!spinnerIconEl) {
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     spinnerHost.classList.remove('d-none');
     spinnerHost.style.display = 'flex';
     spinnerIconEl.style.display = 'inline-block';
-    statusLineEl.style.display  = 'block';
+    statusLineEl.style.display = 'block';
 
     startTime = Date.now();
     timerLineEl.textContent = '⏱️ Total time: 00:00';
@@ -81,12 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const elapsed = Date.now() - startTime;
       const mins = Math.floor(elapsed / 60000);
       const secs = Math.floor((elapsed % 60000) / 1000);
-      timerLineEl.textContent = `⏱️ Total time: ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+      timerLineEl.textContent = `⏱️ Total time: ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }, 500);
   }
   function stopProcessingUI() {
     if (spinnerIconEl) spinnerIconEl.style.display = 'none';
-    if (statusLineEl)  { statusLineEl.textContent = ''; statusLineEl.style.display = 'none'; }
+    if (statusLineEl) { statusLineEl.textContent = ''; statusLineEl.style.display = 'none'; }
     // keep timer visible
   }
   function stopTimer() { clearInterval(timerInterval); }
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // DnD
   if (fileInput) fileInput.addEventListener('change', () => handleFiles(fileInput.files));
   if (dropzone) {
-    ['dragenter','dragover','dragleave','drop'].forEach(evt =>
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt =>
       dropzone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); }, false)
     );
     dropzone.addEventListener('drop', e => handleFiles(e.dataTransfer.files), false);
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function isXlsx(file) {
-    const extOk  = /\.xlsx$/i.test(file.name || '');
+    const extOk = /\.xlsx$/i.test(file.name || '');
     const mimeOk = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     return extOk || mimeOk;
   }
@@ -136,8 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
     processButton.disabled = true;
 
     stopTimer();
-    if (statusLineEl)  { statusLineEl.textContent = ''; statusLineEl.style.display = 'none'; }
-    if (timerLineEl)   { timerLineEl.textContent = ''; }
+    if (statusLineEl) { statusLineEl.textContent = ''; statusLineEl.style.display = 'none'; }
+    if (timerLineEl) { timerLineEl.textContent = ''; }
     if (spinnerIconEl) spinnerIconEl.style.display = 'none';
     spinnerHost.classList.add('d-none');
     spinnerHost.style.display = 'none';
@@ -161,33 +161,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Compute Best Response (frontend logic) ---
   function computeBestRecist(events) {
-    const firstLine = events.find(e => e.testo && e.testo.toLowerCase().includes("inizio del trattamento di i linea"));
-    const secondLine = events.find(e => e.testo && e.testo.toLowerCase().includes("inizio del trattamento di ii linea"));
+    //   const firstLine = events.find(e => e.testo && e.testo.toLowerCase().includes("inizio del trattamento di i linea"));
+    //   const secondLine = events.find(e => e.testo && e.testo.toLowerCase().includes("inizio del trattamento di ii linea"));
 
-    if (!firstLine) return null;
 
-    const startDate = firstLine.data ? new Date(firstLine.data) : null;
-    const endDate = secondLine && secondLine.data ? new Date(secondLine.data) : null;
+    //   if (!firstLine) return null;
 
-    if (!startDate || isNaN(startDate)) return null;
+    //   const startDate = firstLine.data ? new Date(firstLine.data) : null;
+    //   const endDate = secondLine && secondLine.data ? new Date(secondLine.data) : null;
 
-    const ctEvents = events.filter(e => {
-      if (!e.testo || !/tc torace|total body/i.test(e.testo)) return false;
-      const d = e.data ? new Date(e.data) : null;
-      return d && !isNaN(d) && d >= startDate && (!endDate || d < endDate);
-    });
+    //   if (!startDate || isNaN(startDate)) return null;
 
-    if (!ctEvents.length) return null;
+    //   const ctEvents = events.filter(e => {
+    //     if (!e.testo || !/tc torace|total body/i.test(e.testo)) return false;
+    //     const d = e.data ? new Date(e.data) : null;
+    //     return d && !isNaN(d) && d >= startDate && (!endDate || d < endDate);
+    //   });
 
-    // Ranking from best → worst
-    const priority = { CR: 1, PR: 2, SD: 3, PD: 4, NE: 5 };
-    const best = ctEvents
-      .map(e => (e.risposta_recist || '').toUpperCase())
-      .filter(r => priority[r])
-      .sort((a, b) => priority[a] - priority[b])[0];
+    //   if (!ctEvents.length) return null;
 
-    return best ? `Best Response (I line): ${best}` : null;
+    //   // Ranking from best → worst
+    //   const priority = { CR: 1, PR: 2, SD: 3, PD: 4, NE: 5 };
+    //   const best = ctEvents
+    //     .map(e => (e.risposta_recist || '').toUpperCase())
+    //     .filter(r => priority[r])
+    //     .sort((a, b) => priority[a] - priority[b])[0];
+
+    //   return best ? `Best Response (I line): ${best}` : null;
+    // }
+    return null;
   }
+
 
   // --- render a block ONLY when a result is ready (each in its own "island" card) ---
   function renderResultBlock(label, htmlContent, events) {
@@ -297,22 +301,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
               const mainText = `<strong>${evt && evt.testo ? escapeAttr(evt.testo) : ''}</strong>`;
 
-              // 🔹 Add RECIST badge next to CT events
-              let recistBadge = '';
-              if (evt.testo && /tc torace|total body/i.test(evt.testo)) {
-                const resp = (evt.risposta_recist || '').toUpperCase();
-                if (resp) {
-                  const cls =
-                    resp === 'CR' ? 'badge badge-success ml-2' :
-                    resp === 'PR' ? 'badge badge-info ml-2' :
-                    resp === 'SD' ? 'badge badge-secondary ml-2' :
-                    resp === 'PD' ? 'badge badge-danger ml-2' :
-                    'badge badge-light ml-2';
-                  recistBadge = `<span class="${cls}">${resp}</span>`;
-                }
-              }
+              // // 🔹 Add RECIST badge next to CT events
+              // let recistBadge = '';
+              // if (evt.testo && /tc torace|total body/i.test(evt.testo)) {
+              //   const resp = (evt.risposta_recist || '').toUpperCase();
+              //   if (resp) {
+              //     const cls =
+              //       resp === 'CR' ? 'badge badge-success ml-2' :
+              //       resp === 'PR' ? 'badge badge-info ml-2' :
+              //       resp === 'SD' ? 'badge badge-secondary ml-2' :
+              //       resp === 'PD' ? 'badge badge-danger ml-2' :
+              //       'badge badge-light ml-2';
+              //     recistBadge = `<span class="${cls}">${resp}</span>`;
+              //   }
+              // }
 
-              val.innerHTML = `${mainText}${recistBadge}`;
+              // val.innerHTML = `${mainText}${recistBadge}`;
+              val.innerHTML = mainText;
 
               item.append(lbl, val);
               container.appendChild(item);
@@ -338,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stopTimer();
   });
 
-  function showAlert(msg, type='info') {
+  function showAlert(msg, type = 'info') {
     alertContainer.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
     setTimeout(() => { alertContainer.innerHTML = ''; }, 5000);
   }
@@ -368,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const lowerMap = {};
             Object.keys(row).forEach(k => lowerMap[k.toLowerCase().trim()] = row[k]);
 
-            const id = (lowerMap['id'] ?? lowerMap['patient'] ?? lowerMap['#'] ?? `Row ${i+1}`);
+            const id = (lowerMap['id'] ?? lowerMap['patient'] ?? lowerMap['#'] ?? `Row ${i + 1}`);
             const report = (lowerMap['report'] ?? lowerMap['text'] ?? '');
 
             return { id: String(id), report: String(report) };
@@ -389,8 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
     const d = new Date(s);
     if (!isNaN(d.getTime())) {
-      const pad = (n) => String(n).padStart(2,'0');
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     }
     return s || '';
   }
@@ -403,21 +408,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const titleText = pb.querySelector('.patient-title').textContent.trim();
       const pidMatch = titleText.match(/^\d+/);
       const pid = pidMatch ? pidMatch[0] : titleText;
-      
+
       pb.querySelectorAll('.feature-item').forEach(fi => {
-        const dateTxt  = fi.querySelector('.feature-label').textContent.trim();
-        const eventEl  = fi.querySelector('.feature-value');
+        const dateTxt = fi.querySelector('.feature-label').textContent.trim();
+        const eventEl = fi.querySelector('.feature-value');
         const strongEl = eventEl.querySelector('strong');
         const eventTxt = strongEl ? strongEl.textContent.trim() : eventEl.textContent.trim();
 
-        const recistBadge = eventEl.querySelector('.badge');
-        const risposta_recist = recistBadge ? (recistBadge.textContent || '').trim().toUpperCase() : '';
+        //const recistBadge = eventEl.querySelector('.badge');
+        //const risposta_recist = recistBadge ? (recistBadge.textContent || '').trim().toUpperCase() : '';
 
         data.push({
           id: pid,
           data: normalizeDateForExport(dateTxt),
           testo: eventTxt,
-          risposta_recist: risposta_recist || ''
+          //risposta_recist: risposta_recist || ''
         });
       });
     });
@@ -437,7 +442,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Create workbook ---
     const wb = XLSX.utils.book_new();
-    const headers = ['id','data','testo','risposta_recist'];
+    //const headers = ['id','data','testo','risposta_recist'];
+    const headers = ['id', 'data', 'testo'];
 
     // Row 1: model name; Row 2: headers
     const ws = XLSX.utils.aoa_to_sheet([[modelName], headers]);
@@ -452,4 +458,4 @@ document.addEventListener('DOMContentLoaded', () => {
     XLSX.utils.book_append_sheet(wb, ws, 'Timelines');
     XLSX.writeFile(wb, 'timelines.xlsx');
   });
-  });
+});

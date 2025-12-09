@@ -320,21 +320,21 @@ def process():
 def get_models():
     """Returns supported generative models."""
     allowed_models = [
-        "mistral:instruct",
-        "qwen2.5:32b",
-        "phi4:14b",
-        "deepseek-r1:14b",
-        "gemma:latest",
-        "qwen:14b",
-        "qwen:latest",
-        "llama3:8b-instruct-q4_K_M",
-        "mistral-small3.2:24b",
-        "devstral:24b",
-        "qwen3:30b",
-        "qwen3:14b",
+        #"mistral:instruct",
+        #"qwen2.5:32b",
+        #"phi4:14b",
+        #"deepseek-r1:14b",
+        #"gemma:latest",
+        #"qwen:14b",
+        #"qwen:latest",
+        #"llama3:8b-instruct-q4_K_M",
+        #"mistral-small3.2:24b",
+        #"devstral:24b",
+        #"qwen3:30b",
+        #"qwen3:14b",
         "gemma3:12b",
         "gemma3:27b",
-        "llama3.1:8b-custom",
+        #"llama3.1:8b-custom",
         "llama3.1:8b",
         "mistral:latest",
     ]
@@ -654,16 +654,44 @@ def process_timeline_text():
 
         events = extract_timeline_from_text(report)
 
-        # Ensure all RECIST-related fields exist for frontend rendering
+        cleaned_events = []
         for ev in events:
-            ev.setdefault('risposta_recist', '')
-            ev.setdefault('basis_note', '')
-            ev.setdefault('basis_compared_to', '')
+            if isinstance(ev, dict):
+                # Ensure required keys exist
+                ev.setdefault('data', '')
+                ev.setdefault('testo', '')
+                cleaned_events.append(ev)
+            else:
+                # If the model returned a string (bad), wrap it safely
+                cleaned_events.append({
+                    "data": "",
+                    "testo": str(ev)
+                })
 
+        events = cleaned_events
         return jsonify({'id': row_id, 'features': events}), 200
+
     except Exception as e:
-        logger.exception("❌ Error in /process_timeline_text")
-        return jsonify({'error': str(e)}), 500
+        import traceback
+        traceback.print_exc()   # <<< prints full traceback to your terminal
+        raise                   # <<< rethrow so Flask debugger shows the error
+
+
+
+################################
+        # # Ensure all RECIST-related fields exist for frontend rendering
+        # for ev in events:
+        #     ev.setdefault('risposta_recist', '')
+        #     ev.setdefault('basis_note', '')
+        #     ev.setdefault('basis_compared_to', '')
+
+
+    #     return jsonify({'id': row_id, 'features': events}), 200
+    # except Exception as e:
+    #     logger.exception("❌ Error in /process_timeline_text")
+    #     return jsonify({'error': str(e)}), 500
+################################
+
 
 # @bp.route('/medications_evaluation')
 # def medications_evaluation():

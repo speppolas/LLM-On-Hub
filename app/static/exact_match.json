@@ -1,6 +1,6 @@
 {
-  "accuracy": 0.5,
-  "n_records": 2,
+  "accuracy": 0.1,
+  "n_records": 10,
   "features_used": [
     "dosage",
     "exon",
@@ -12,16 +12,64 @@
   ],
   "by_id": [
     {
-      "id": "127232::erlotinib",
+      "id": "159493::gefitinib",
       "exact_match": 0,
-      "n_mismatches": 2,
-      "mismatched_fields": "exon: GT='esone 19' | PRED='none'; mutation: GT='exon 19 del' | PRED='none'"
+      "n_mismatches": 1,
+      "mismatched_fields": "mutation: GT='l861q' | PRED='l861q+altre mutazioni'"
     },
     {
-      "id": "127232::osimertinib",
+      "id": "182694::afatinib",
+      "exact_match": 0,
+      "n_mismatches": 3,
+      "mismatched_fields": "exon: GT='none' | PRED='esone 19'; frequency: GT='none' | PRED='1 cp/die'; mutation: GT='none' | PRED='exon 19 del+altre mutazioni'"
+    },
+    {
+      "id": "266849::osimertinib",
+      "exact_match": 0,
+      "n_mismatches": 2,
+      "mismatched_fields": "exon: GT='esone 18' | PRED='none'; mutation: GT='e709k+g719c' | PRED='none'"
+    },
+    {
+      "id": "527765::osimertinib",
+      "exact_match": 0,
+      "n_mismatches": 2,
+      "mismatched_fields": "exon: GT='esone 19' | PRED='none'; mutation: GT='exon 19 del+t790m' | PRED='t790m'"
+    },
+    {
+      "id": "537372::gefitinib",
       "exact_match": 1,
       "n_mismatches": 0,
       "mismatched_fields": ""
+    },
+    {
+      "id": "589681::erlotinib",
+      "exact_match": 0,
+      "n_mismatches": 1,
+      "mismatched_fields": "frequency: GT='none' | PRED='1 cp/die'"
+    },
+    {
+      "id": "589681::gefitinib",
+      "exact_match": 0,
+      "n_mismatches": 1,
+      "mismatched_fields": "mutation: GT='l858r' | PRED='l858r+altre mutazioni'"
+    },
+    {
+      "id": "7146748::erlotinib",
+      "exact_match": 0,
+      "n_mismatches": 2,
+      "mismatched_fields": "exon: GT='esone 19' | PRED='esone 19+esone 20+esone 5'; mutation: GT='exon 19 del' | PRED='l861q'"
+    },
+    {
+      "id": "8509200::gefitinib",
+      "exact_match": 0,
+      "n_mismatches": 1,
+      "mismatched_fields": "mutation: GT='none' | PRED='altre mutazioni'"
+    },
+    {
+      "id": "9233303::osimertinib",
+      "exact_match": 0,
+      "n_mismatches": 2,
+      "mismatched_fields": "exon: GT='esone 19' | PRED='esone 21'; frequency: GT='1 cp/die' | PRED='80 mg/die'"
     }
   ]
 }

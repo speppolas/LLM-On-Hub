@@ -1,43 +1,241 @@
 {
   "labels": [
+    "altre mutazioni",
+    "e709k+g719c",
     "exon 19 del",
-    "none"
+    "exon 19 del+altre mutazioni",
+    "exon 19 del+t790m",
+    "l858r",
+    "l858r+altre mutazioni",
+    "l861q",
+    "l861q+altre mutazioni",
+    "none",
+    "t790m"
   ],
   "matrix": [
     [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
       0,
       1
     ],
     [
       0,
-      1
+      0,
+      0,
+      0,
+      0,
+      2,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
     ]
   ],
   "report": {
+    "altre mutazioni": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "e709k+g719c": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 1.0
+    },
     "exon 19 del": {
       "precision": 0.0,
       "recall": 0.0,
       "f1-score": 0.0,
       "support": 1.0
     },
-    "none": {
+    "exon 19 del+altre mutazioni": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "exon 19 del+t790m": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 1.0
+    },
+    "l858r": {
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.8,
+      "support": 3.0
+    },
+    "l858r+altre mutazioni": {
       "precision": 0.5,
       "recall": 1.0,
       "f1-score": 0.6666666666666666,
       "support": 1.0
     },
-    "accuracy": 0.5,
-    "macro avg": {
-      "precision": 0.25,
-      "recall": 0.5,
-      "f1-score": 0.3333333333333333,
+    "l861q": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 1.0
+    },
+    "l861q+altre mutazioni": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "none": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
       "support": 2.0
     },
+    "t790m": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "accuracy": 0.3,
+    "macro avg": {
+      "precision": 0.13636363636363635,
+      "recall": 0.1515151515151515,
+      "f1-score": 0.13333333333333333,
+      "support": 10.0
+    },
     "weighted avg": {
-      "precision": 0.25,
-      "recall": 0.5,
-      "f1-score": 0.3333333333333333,
-      "support": 2.0
+      "precision": 0.35,
+      "recall": 0.3,
+      "f1-score": 0.3066666666666667,
+      "support": 10.0
     }
   }
 }
