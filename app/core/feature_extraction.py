@@ -63,26 +63,56 @@ def extract_features_with_llm(text: str) -> Dict[str, Any]:
 
     # JSON ONLY OUTPUT:
     # """
-    prompt = f"""You are a clinical NLP model. Extract ONLY the following JSON object from the text below, with no explanation or extra text. Use keys:
+    prompt = f"""
+Sei un modello NLP per l’assegnazione a studi clinici sul carcinoma polmonare.
 
-{{
-  "age": int or null,
-  "gender": male, female,
-  "diagnosis": SCLC, adenocarcinoma, squamous cell lung cancer, other,
-  "stage": II, III, IV,
-  "ecog_ps": 0, 1,
-  "mutations": EGFR, KRAS, MET, not mentioned,
-  "metastases": brain, liver, bone, lymph nodes, adrenal, pleural, not mentioned,
-  "previous_treatments": carboplatin, cisplatin, paclitaxel, docetaxel, pembrolizumab,
-                       nivolumab, atezolizumab, durvalumab, osimertinib,
-                       erlotinib, gefitinib, crizotinib, alectinib, not mentioned,
-  "PD_L1": <1%, 1-49%, >50%, not mentioned
-}}
+Data la seguente cartella clinica STRUTTURATA usando l’estrazione BASATA SU SEZIONI:
 
-
-Text:
+Testo:
 {text}
 
+Restituisci UNO e SOLO UNO oggetto JSON che rispetti ESATTAMENTE lo schema e le regole seguenti.
+- Output: SOLO l’oggetto JSON. Nessun testo prima/dopo. Nessun markdown. Nessun commento. Nessun code fence.
+- Se un valore non è ricavabile dal testo, scrivi esattamente "not mentioned" (per TUTTI i campi, inclusi i numerici).
+- Quando sono richieste liste, restituisci un array JSON. Se non è menzionato nulla, restituisci ["not mentioned"].
+- Normalizza i nomi in inglese quando possibile (es. carboplatino → carboplatin; linfonodali → lymph nodes).
+
+Schema (senza commenti inline):
+{{
+  "age": int | "not mentioned",
+  "gender": "male" | "female" | "not mentioned",
+  "ecog_ps": 0 | 1 | 2 | "not mentioned",
+  "histology": "squamous" | "adenocarcinoma" | "small_cell" | "not mentioned",
+  "current_stage": "II" | "III" | "IV" | "not mentioned",
+  "line_of_therapy": "1L" | "2L" | ">=3L" | "adjuvant" | "neoadjuvant" | "maintenance" | "not mentioned",
+  "pd_l1_tps": "0%" | "<1%" | "1-49%" | ">=50%" | "not mentioned",
+  "biomarkers": "KRAS_G12C" | "EGFR_exon19_del" | "EGFR_L858R" | "EGFR_T790M" | "EGFR_L861Q" | "EGFR_P772R" | "MET_amplification" | "MET_exon14" | "HER2_exon20" | "ALK" | "ROS1" | "RET" | "NTRK" | "BRAF_V600E" | "STK11" | "TP53" | "DNMT3A" | "KRAS_Q61H" | "not mentioned",
+  "brain_metastasis": ["true" | "false" | "not mentioned"],
+  "prior_systemic_therapies": ["carboplatin" | "cisplatin" | "etoposide" | "pemetrexed" | "paclitaxel" | "docetaxel" | "pembrolizumab" | "nivolumab" | "atezolizumab" | "durvalumab" | "osimertinib" | "erlotinib" | "gefitinib" | "sotorasib" | "adagrasib" | "divarasib" | "savolitinib" | "alectinib" | "crizotinib" | "other"] | ["not mentioned"],
+  "comorbidities": ["string"] | ["not mentioned"],
+  "concomitant_treatments": ["string"] | ["not mentioned"],
+}}
+
+Linee guida operative (commenti fuori dallo schema):
+- Per "line_of_therapy": se il testo dice "candidata a terapia sistemica di I linea" → line_of_therapy="1L".
+- Per "pd_l1_tps": usa i bucket esatti richiesti.
+- Per "biomarkers": cerca preferibilmente nelle sezioni "Sintesi Clinica" e "Diagnosi Oncologica".
+  Esempi:
+    • "EGFR Exon 19 deletion rilevata" → "biomarkers": "EGFR_exon19_del"
+    • "KRAS ... (Q61H) 34%" → "biomarkers": "KRAS_Q61H"
+- Per "brain_metastasis": preferisci la TC/PET più recente.
+  Esempi:
+    • "CNS metastasis" → ["true"]
+    • "secondarismi linfonodali, pleurici ed ossei." → ["false"]
+- Per "prior_systemic_therapies": estrarre SOLO trattamenti oncologici già somministrati (non intenzioni future).
+  Esempi:
+    • "la terapia sarà carboplatino + pemetrexed" → "prior_systemic_therapies": ["not mentioned"]
+    • "il paziente risulta candidabile a trattamento chemio-immunoterapico di 1° linea a base di sali di platino + etoposide + atezolizumab." → "prior_systemic_therapies": ["not mentioned"]
+- Per "comorbidities": estrarre SOLO dalla sezione "COMORBIDITÀ".
+- Per "concomitant_treatments": estrarre SOLO dalla sezione "terapie domiciliari" (solo nomi, senza dosi/date).
+  Esempio: "Losaprex (losartan)... Omeprazolo..." → ["losartan","omeprazolo"]
+- Per metastasi, preferire i reperti della TC/PET più recente.
+- Qualsiasi informazione assente → "not mentioned" (mai null).
 """
 
     logger.info(f"Prompt sent to LLM:\n{prompt[:2000]}")  # Log the prompt snippet

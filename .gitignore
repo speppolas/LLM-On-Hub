@@ -11,3 +11,4 @@ logs/*
 .pytest_cache/
 .mypy_cache/
 venv/
+*:Zone.Identifier
