@@ -1,5 +1,40 @@
 [
   {
+  "id": "NCT05118789",
+  "title": "A Phase 1/2 Study of the Highly Selective ROS1 Inhibitor Zidesamtinib (NVL-520) in Patients With Advanced NSCLC and Other Solid Tumors (ARROS-1)",
+  "phase": "PHASE1, PHASE2",
+  "description": "Phase 1/2, dose escalation and expansion study designed to evaluate the safety, tolerability, and antitumor activity of zidesamtinib (NVL-520) in patients with advanced ROS1-rearranged NSCLC and other solid tumors. Phase 1 determines the recommended Phase 2 dose (RP2D) and maximum tolerated dose (MTD). Phase 2 evaluates objective response rate (ORR) and other efficacy endpoints across multiple expansion cohorts.",
+  "inclusion_criteria": [
+    "Inclusion Criteria:",
+    "",
+    "* Age ≥18 years (Cohort 2e: Age ≥12 years).",
+    "* Phase 1: Histologically or cytologically confirmed locally advanced or metastatic solid tumor with documented ROS1 rearrangement.",
+    "* Phase 2 (Cohorts 2a–2d): Histologically or cytologically confirmed locally advanced or metastatic NSCLC with ROS1 rearrangement.",
+    "* Phase 2 (Cohort 2e): Histologically or cytologically confirmed locally advanced or metastatic solid tumor other than NSCLC with ROS1 rearrangement.",
+    "* Prior anticancer treatment allowed according to cohort definition (except Cohort 2a).",
+    "* Phase 1: Evaluable disease per RECIST 1.1.",
+    "* Phase 2: Measurable disease per RECIST 1.1.",
+    "* Adequate baseline organ function and bone marrow reserve."
+  ],
+  "exclusion_criteria": [
+    "Exclusion Criteria:",
+    "",
+    "* Presence of a known oncogenic driver alteration other than ROS1.",
+    "* Known allergy or hypersensitivity to excipients of NVL-520.",
+    "* Major surgery within 4 weeks prior to first dose of study drug.",
+    "* Ongoing anticancer therapy.",
+    "* Actively receiving systemic treatment or direct medical intervention in another therapeutic clinical study."
+  ],
+  "gender": "All",
+  "min_age": "18 Years",
+  "max_age": "Not specified",
+  "status": "RECRUITING",
+  "start_date": "2022",
+  "completion_date": "Not specified",
+  "sponsor": "Unknown",
+  "last_updated": "Not specified"
+  },
+  {
     "id": "NCT02603432",
     "title": "A Study Of Avelumab In Patients With Locally Advanced Or Metastatic Urothelial Cancer (JAVELIN Bladder 100)",
     "phase": "PHASE3",
