@@ -1,0 +1,50 @@
+trial_id: NCT05789082
+title: KRASCENDO 170 – Divarasib (KRAS G12C)
+
+policy:
+  inclusion_missing: unknown
+  exclusion_missing: pass
+
+inclusion:
+  - id: INC_NSCLC
+    text: "Advanced or metastatic NSCLC"
+    field: histology
+    condition: ontology_is_a
+    value: NSCLC
+
+  - id: INC_KRAS
+    text: "KRAS G12C mutation"
+    field: biomarkers
+    condition: contains
+    value: "KRAS_G12C"
+
+  - id: INC_FIRST_LINE
+    text: "Previously untreated"
+    field: line_of_therapy
+    condition: equals
+    value: "1L"
+
+  - id: INC_ECOG
+    text: "ECOG 0–1"
+    field: ecog_ps
+    condition: lte
+    value: 1
+
+exclusion:
+  - id: EXC_SQUAMOUS
+    text: "Squamous cell histology"
+    field: histology
+    condition: equals
+    value: "squamous"
+
+  - id: EXC_CNS_ACTIVE
+    text: "Symptomatic or progressing CNS metastases"
+    field: brain_metastasis
+    condition: equals
+    value: "true"
+
+  - id: EXC_PRIOR_KRAS
+    text: "Prior KRAS G12C inhibitor"
+    field: prior_systemic_therapies
+    condition: contains_any
+    value: ["sotorasib", "adagrasib"]

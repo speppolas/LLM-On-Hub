@@ -1,0 +1,38 @@
+trial_id: NCT05224141
+title: ES-SCLC First-Line MK-7684A vs Atezolizumab
+
+policy:
+  inclusion_missing: unknown
+  exclusion_missing: pass
+
+inclusion:
+  - id: INC_SCLC
+    text: "Histologically confirmed ES-SCLC"
+    field: histology
+    condition: ontology_is_a
+    value: SCLC
+
+  - id: INC_STAGE
+    text: "Extensive-stage disease (Stage IV)"
+    field: current_stage
+    condition: equals
+    value: IV
+
+  - id: INC_FIRST_LINE
+    text: "In need of first-line therapy"
+    field: line_of_therapy
+    condition: equals
+    value: "1L"
+
+exclusion:
+  - id: EXC_PRIOR_SCLC
+    text: "Prior treatment for SCLC"
+    field: line_of_therapy
+    condition: not_equals
+    value: "1L"
+
+  - id: EXC_CNS
+    text: "Active CNS metastases"
+    field: brain_metastasis
+    condition: equals
+    value: "true"

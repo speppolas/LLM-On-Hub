@@ -1,3 +1,4 @@
+#routes.py
 import os
 import json
 import logging
@@ -10,7 +11,8 @@ from app.utils import (
     clean_expired_files,
     get_all_trials
 )
-from app.core.feature_extraction import highlight_sources, extract_features_with_llm, match_trials_llm
+from app.core.ontology_engine.pipeline import evaluate_patient_against_trials
+from app.core.feature_extraction import highlight_sources, extract_features_with_llm
 from app.core.llm_processor import get_llm_processor
 from app import logger 
 from app.core.feature_extraction import extract_features_with_llm, extract_text_from_pdf
@@ -116,10 +118,10 @@ def process():
         
         logger.info(f"✅ Extracted Features: {json.dumps(llm_text, indent=2)}")
     
-        logger.info("🤖 Calling LLM for trial matching (Batched)...")
+        logger.info("🧠 Running neuro-symbolic eligibility engine...")
         logger.debug(f"🔍 DEBUG: Calling match_trials_llm with features: {json.dumps(llm_text, indent=2)}")
         
-        matched_trials = match_trials_llm(llm_text)
+        matched_trials = evaluate_patient_against_trials(llm_text)
         logger.info(f"✅ Matched Trials: {len(matched_trials)} trials found.")
         
         return jsonify({
@@ -133,6 +135,11 @@ def process():
         logger.exception("❌ Unhandled exception in /process")
         return jsonify({'error': str(e)}), 500
 
+@bp.route("/match_trials", methods=["POST"])
+def match_trials():
+    patient_features = request.json
+    results = evaluate_patient_against_trials(patient_features)
+    return jsonify(results)
 
 @bp.route('/api/trials', methods=['GET'])
 def get_trials():

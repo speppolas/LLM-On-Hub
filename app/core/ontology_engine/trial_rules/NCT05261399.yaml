@@ -1,0 +1,50 @@
+trial_id: NCT05261399
+title: SAFFRON – Savolitinib + Osimertinib
+
+policy:
+  inclusion_missing: unknown
+  exclusion_missing: pass
+
+inclusion:
+  - id: INC_NSCLC
+    text: "Locally advanced or metastatic NSCLC"
+    field: histology
+    condition: ontology_is_a
+    value: NSCLC
+
+  - id: INC_STAGE
+    text: "Locally advanced or metastatic disease"
+    field: current_stage
+    condition: in
+    value: ["III", "IV"]
+
+  - id: INC_EGFR
+    text: "Sensitising EGFR mutation"
+    field: biomarkers
+    condition: contains_any
+    value: ["EGFR_exon19_del", "EGFR_L858R", "EGFR_T790M"]
+
+  - id: INC_POST_OSIMERTINIB
+    text: "Progressed after osimertinib"
+    field: prior_systemic_therapies
+    condition: contains
+    value: "osimertinib"
+
+  - id: INC_ECOG
+    text: "ECOG 0–1"
+    field: ecog_ps
+    condition: lte
+    value: 1
+
+exclusion:
+  - id: EXC_SQUAMOUS
+    text: "Predominant squamous NSCLC"
+    field: histology
+    condition: equals
+    value: "squamous"
+
+  - id: EXC_ACTIVE_CNS
+    text: "Brain metastases unless asymptomatic and stable"
+    field: brain_metastasis
+    condition: equals
+    value: "true"

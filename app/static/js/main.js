@@ -140,11 +140,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const featureLabel = document.createElement('div');
             featureLabel.className = 'feature-label';
-            featureLabel.textContent = key.replace(/_/g, ' ').toUpperCase();
+            featureLabel.textContent = key.toUpperCase();
 
             const featureValue = document.createElement('div');
             featureValue.className = 'feature-value';
-            featureValue.textContent = JSON.stringify(value, null, 2);
+            if (Array.isArray(value)) {
+                featureValue.textContent = value.join(', ');
+            } else {
+                featureValue.textContent = value;
+            }
+
 
             featureDiv.appendChild(featureLabel);
             featureDiv.appendChild(featureValue);
@@ -153,66 +158,81 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Display matched clinical trials
-    function displayMatches(matches) {
-        const matchesContainer = document.getElementById('matches-container');
-        if (!matchesContainer) return;
-        matchesContainer.innerHTML = '';
 
-        if (!matches || matches.length === 0) {
-            matchesContainer.innerHTML = '<p>No matched trials found.</p>';
-            return;
+
+
+function displayMatches(matches) {
+    const matchesContainer = document.getElementById('matches-container');
+    if (!matchesContainer) return;
+
+    matchesContainer.innerHTML = '';
+
+    if (!matches || matches.length === 0) {
+        matchesContainer.innerHTML = '<p>No matched trials found.</p>';
+        return;
+    }
+
+    matches.forEach(match => {
+        const matchCard = document.createElement('div');
+        matchCard.className = 'match-card p-3 mb-3 border rounded';
+
+        // Badge per eligibility
+        let badgeHtml = '';
+        if (match.overall === 'eligible') {
+            badgeHtml = '<span class="badge bg-success">Eligible</span>';
+        } else if (match.overall === 'not_eligible') {
+            badgeHtml = '<span class="badge bg-danger">Not eligible</span>';
+        } else {
+            badgeHtml = '<span class="badge bg-warning text-dark">Unknown</span>';
         }
 
-        matches.forEach(match => {
-            const matchCard = document.createElement('div');
-            matchCard.className = 'match-card p-3 mb-3 border rounded';
+        // Costruzione trace (XAI)
+        let inclusionHtml = '';
+        if (match.trace && match.trace.inclusion) {
+            inclusionHtml = match.trace.inclusion.map(c => `
+                <li>
+                    <strong>${c.id}</strong> — ${c.status}
+                    <br/>
+                    <small>${c.text || ''}</small>
+                </li>
+            `).join('');
+        }
 
-            // matchCard.innerHTML = `
-            //     <h4><strong>Trial ID:</strong> ${match.trial_id}</h4>
-            //     <p><strong>Title:</strong> ${match.title || "Not Provided"}</p>
-            //     <p><strong>Description:</strong> ${match.description || "No description provided."}</p>
-            //     <p><strong>Match Score (Confidence):</strong> ${match.match_score || 0}%</p>
-            //     <p><strong>Recommendation:</strong> ${match.recommendation || "Not Available"}</p>
-            //     <p><strong>Summary:</strong> ${match.summary || "No summary available."}</p>
-            // `;
-            matchCard.innerHTML = `
-                <h4><strong>Trial ID:</strong> ${match.trial_id}</h4>
-                <p><strong>Title:</strong> ${match.title || "Not Provided"}</p>
-                <p><strong>Match Score (Confidence):</strong> ${match.match_score || 0}%</p>
-                <p><strong>Recommendation:</strong> ${match.recommendation || "Not Available"}</p>
-                <p><strong>Summary:</strong> ${match.summary || "No summary available."}</p>
-            `;
+        let exclusionHtml = '';
+        if (match.trace && match.trace.exclusion) {
+            exclusionHtml = match.trace.exclusion.map(c => `
+                <li>
+                    <strong>${c.id}</strong> — ${c.status}
+                    <br/>
+                    <small>${c.text || ''}</small>
+                </li>
+            `).join('');
+        }
+
+        matchCard.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>${match.title || 'Unknown Trial'}</h4>
+                ${badgeHtml}
+            </div>
+
+            <p><strong>Trial ID:</strong> ${match.trial_id}</p>
+
+            <details class="mt-2">
+                <summary><strong>Inclusion Criteria Evaluation</strong></summary>
+                <ul>${inclusionHtml || '<li>No inclusion criteria evaluated.</li>'}</ul>
+            </details>
+
+            <details class="mt-2">
+                <summary><strong>Exclusion Criteria Evaluation</strong></summary>
+                <ul>${exclusionHtml || '<li>No exclusion criteria evaluated.</li>'}</ul>
+            </details>
+        `;
+
+        matchesContainer.appendChild(matchCard);
+    });
+}
 
 
-            // Criteria Analysis (Inclusion & Exclusion)
-            if (match.criteria_analysis) {
-                const analysisDiv = document.createElement('div');
-                analysisDiv.className = 'match-analysis mt-3';
-
-                const inclusionList = match.criteria_analysis.inclusion_criteria
-                    ? match.criteria_analysis.inclusion_criteria.map(item => `<li>${item}</li>`).join('')
-                    : "<li>No inclusion criteria provided.</li>";
-
-                const exclusionList = match.criteria_analysis.exclusion_criteria
-                    ? match.criteria_analysis.exclusion_criteria.map(item => `<li>${item}</li>`).join('')
-                    : "<li>No exclusion criteria provided.</li>";
-
-                analysisDiv.innerHTML = `
-                    <h5>Criteria Analysis:</h5>
-                    <div class="mt-2">
-                        <p><strong>Inclusion Criteria:</strong></p>
-                        <ul>${inclusionList}</ul>
-                        <p><strong>Exclusion Criteria:</strong></p>
-                        <ul>${exclusionList}</ul>
-                    </div>
-                `;
-
-                matchCard.appendChild(analysisDiv);
-            }
-
-            matchesContainer.appendChild(matchCard);
-        });
-    }
     // Show alert message
     function showAlert(message, type = 'info') {
         if (!alertContainer) return;

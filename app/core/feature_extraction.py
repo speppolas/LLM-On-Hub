@@ -11,6 +11,8 @@ from app.core.llm_processor import get_llm_processor
 from app.core.schema_validation import ClinicalFeatures, ValidationError
 from app.utils import get_all_trials
 
+
+
 from app import logger
 
 # Ensure the logs folder exists
@@ -160,128 +162,6 @@ def highlight_sources(text: str, features: Dict[str, Any]) -> str:
             except Exception as e:
                 logger.warning(f"⚠️ Failed to highlight '{value}': {e}")
     return text
-
-
-
-# import json
-# import time
-# import re
-# import os
-# from typing import Dict, Any, List
-# from datetime import datetime, timedelta
-
-# def parse_llm_response(raw_response: str) -> list:
-#     """
-#     Estrae e parsifica il JSON dei trial dalla chiave 'response' all'interno di raw_response.
-#     """
-#     try:
-#         response_data = json.loads(raw_response)
-#         llm_text_response = response_data.get("response", "")
-#         if not llm_text_response:
-#             raise ValueError("❌ Nessuna risposta trovata nella chiave 'response'.")
-
-#         json_match = re.search(r"```json\s*(\[.*?\])\s*```", llm_text_response, re.DOTALL)
-#         if not json_match:
-#             json_match = re.search(r"```(.*?)```", llm_text_response, re.DOTALL)
-
-#         if json_match:
-#             json_text = json_match.group(1).strip()
-#             parsed_json = json.loads(json_text)
-#             return parsed_json if isinstance(parsed_json, list) else []
-#         else:
-#             raise ValueError("❌ Nessun blocco JSON trovato nella risposta LLM.")
-#     except (json.JSONDecodeError, ValueError) as e:
-#         logger.error(f"❌ Errore durante il parsing della risposta LLM: {str(e)}")
-#         return []
-
-# def match_trials_llm(llm_text: Dict[str, Any]) -> List[Dict[str, Any]]:
-#     logger.info("✅ Starting LLM Trial Matching (Single Request)...")
-#     print("✅ Starting LLM Trial Matching (Single Request)...")
-
-#     llm = get_llm_processor()
-#     trials = get_all_trials()
-#     logger.info(f"✅ Trials loaded: {len(trials)}")
-#     print(f"✅ Trials loaded: {len(trials)}")
-
-#     if not trials:
-#         logger.error("❌ No trials found in database")
-#         print("❌ No trials found in database")
-#         return []
-
-#     prompt = f"""
-# You are a clinical AI assistant. Is the following patient eligible for this trials? 
-
-# PATIENT FEATURES:
-# {json.dumps(llm_text, indent=2)}
-
-# ### TRIALS:
-# {json.dumps(trials, indent=2)}
-
-# Explain me why you decided the eligibility or not through a JSON list where each object is in the following strict format :
-# [
-#   {{
-#     "trial_id": string,
-#     "title": string,
-#     "description": string,
-#     "match_score": integer (0 to 100),
-#     "overall_recommendation": string,
-#     "criteria_analysis": {{
-#       "inclusion_criteria": list,
-#       "exclusion_criteria": list
-#     }},
-#     "summary": string
-#   }}
-# ]
-# """
-#     debug_filename = f"logs/llm_match_debug_{int(time.time())}.json"
-#     debug_data = {"llm_text": llm_text, "raw_response": None}
-
-#     try:
-#         response = llm.generate_response(prompt)
-#         logger.info(f"🔧 LLM Raw Response: {response[:1000]}")
-#         if not response:
-#             logger.error("❌ Empty response from LLM")
-#             debug_data["raw_response"] = "EMPTY RESPONSE"
-#             return []
-
-#         debug_data["raw_response"] = response
-
-#         match_results = parse_llm_response(response)
-#         matched_trials = []
-
-#         if isinstance(match_results, list):
-#             for trial, match_result in zip(trials, match_results):
-#                 matched_trials.append({
-#                     "trial_id": trial.get("id"),
-#                     "title": trial.get("title", "Unknown Trial"),
-#                     "description": trial.get("description", "No description provided."),
-#                     "match_score": match_result.get("match_score", 0),
-#                     "recommendation": match_result.get("overall_recommendation", "UNKNOWN"),
-#                     "criteria_analysis": match_result.get("criteria_analysis", {}),
-#                     "summary": match_result.get("summary", "No summary available.")
-#                 })
-#         else:
-#             logger.error("❌ Invalid JSON structure returned by LLM")
-
-#     except Exception as e:
-#         logger.error(f"❌ Error during LLM trial matching: {str(e)}")
-#         debug_data["error"] = str(e)
-#         matched_trials = []
-
-#     with open(debug_filename, "w") as f:
-#         json.dump(debug_data, f, indent=2)
-#     logger.info(f"💾 Saved LLM trial matching debug output to {debug_filename}")
-#     print(f"💾 Saved LLM trial matching debug output to {debug_filename}")
-
-#     matched_trials.sort(key=lambda x: x.get('match_score', 0), reverse=True)
-#     logger.info(f"✅ Trial matching completed. {len(matched_trials)} trials matched.")
-
-#     matched_trials_filename = f"logs/matched_trials_{int(time.time())}.json"
-#     with open(matched_trials_filename, "w") as f:
-#         json.dump(matched_trials, f, indent=2)
-#     logger.info(f"💾 Matched trials saved to {matched_trials_filename}")
-
-#     return matched_trials
 
 
 import json
