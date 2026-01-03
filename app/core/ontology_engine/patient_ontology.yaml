@@ -1,39 +1,33 @@
 # app/core/ontology_engine/patient_ontology.yaml
 
-version: 1.0
-description: "Internal clinical ontology aligned to LLM extraction schema"
-
-histology:
-  squamous:
-    is_a: Squamous_NSCLC
-  adenocarcinoma:
-    is_a: Non_squamous_NSCLC
-  small_cell:
-    is_a: SCLC
-
-stage:
-  III:
-    is_a: Locally_advanced_disease
-  IV:
-    is_a: Metastatic_disease
-
 ecog_ps:
   0:
-    is_a: Good_PS
+    concept: ECOG_0
   1:
-    is_a: Good_PS
+    concept: ECOG_1
   2:
-    is_a: Intermediate_PS
+    concept: ECOG_2
 
-brain_metastasis:
-  "true":
-    is_a: CNS_metastatic_disease
-  "false":
-    is_a: No_CNS_disease
+brain_metastasis_status:
+  none:
+    concept: No_CNS_disease
+  treated_stable:
+    concept: Stable_CNS_disease
+  active_symptomatic:
+    concept: Active_CNS_disease
 
-response_groups:
-  Non_progressive_disease:
-    members:
-      - complete response
-      - partial response
-      - stable disease
+histology:
+  adenocarcinoma:
+    concept: NSCLC
+  squamous:
+    concept: NSCLC
+  small_cell:
+    concept: SCLC
+
+current_stage:
+  II:
+    concept: Stage_II
+  III:
+    concept: Stage_III
+  IV:
+    concept: Stage_IV

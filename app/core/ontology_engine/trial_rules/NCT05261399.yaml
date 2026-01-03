@@ -1,50 +1,56 @@
 trial_id: NCT05261399
-title: SAFFRON – Savolitinib + Osimertinib
+title: SAFFRON (Savolitinib + Osimertinib)
 
 policy:
   inclusion_missing: unknown
   exclusion_missing: pass
 
 inclusion:
-  - id: INC_NSCLC
-    text: "Locally advanced or metastatic NSCLC"
+  - id: INC_AGE
+    field: age
+    condition: gte
+    value: 18
+    text: "Age ≥ 18 years"
+
+  - id: INC_HISTOLOGY
     field: histology
     condition: ontology_is_a
     value: NSCLC
-
-  - id: INC_STAGE
-    text: "Locally advanced or metastatic disease"
-    field: current_stage
-    condition: in
-    value: ["III", "IV"]
+    text: "Locally advanced or metastatic NSCLC"
 
   - id: INC_EGFR
-    text: "Sensitising EGFR mutation"
     field: biomarkers
     condition: contains_any
-    value: ["EGFR_exon19_del", "EGFR_L858R", "EGFR_T790M"]
+    value: [EGFR_L858R, EGFR_exon19_del, EGFR_T790M]
+    text: "Sensitising EGFR mutation"
 
-  - id: INC_POST_OSIMERTINIB
-    text: "Progressed after osimertinib"
+  - id: INC_PRIOR_OSIMERTINIB
     field: prior_systemic_therapies
     condition: contains
-    value: "osimertinib"
+    value: osimertinib
+    text: "Progressed on osimertinib"
 
   - id: INC_ECOG
-    text: "ECOG 0–1"
     field: ecog_ps
     condition: lte
     value: 1
+    text: "ECOG 0–1"
+
+  - id: INC_MET
+    field: biomarkers
+    condition: contains
+    value: MET_amplification
+    text: "MET overexpression or amplification"
 
 exclusion:
-  - id: EXC_SQUAMOUS
-    text: "Predominant squamous NSCLC"
+  - id: EXC_ACTIVE_CNS
+    field: brain_metastasis_status
+    condition: equals
+    value: active_symptomatic
+    text: "Active or symptomatic brain metastases"
+
+  - id: EXC_SCLC
     field: histology
     condition: equals
-    value: "squamous"
-
-  - id: EXC_ACTIVE_CNS
-    text: "Brain metastases unless asymptomatic and stable"
-    field: brain_metastasis
-    condition: equals
-    value: "true"
+    value: small_cell
+    text: "Small cell lung cancer"

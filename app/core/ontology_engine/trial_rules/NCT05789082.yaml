@@ -39,9 +39,10 @@ exclusion:
 
   - id: EXC_CNS_ACTIVE
     text: "Symptomatic or progressing CNS metastases"
-    field: brain_metastasis
-    condition: equals
-    value: "true"
+    field: brain_metastasis_status
+    condition: ontology_is_a
+    value: Active_CNS_disease
+
 
   - id: EXC_PRIOR_KRAS
     text: "Prior KRAS G12C inhibitor"

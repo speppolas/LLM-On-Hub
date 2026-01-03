@@ -32,39 +32,6 @@ def extract_text_from_pdf(pdf_file: Union[str, bytes]) -> str:
 def extract_features_with_llm(text: str) -> Dict[str, Any]:
     from app.core.llm_processor import get_llm_processor
     llm = get_llm_processor()
-    # prompt = f"""
-    # You are a medical AI assistant. Extract clinical features from the clinical text below. For each field, return:
-    # - The extracted value
-    # - And the corresponding *_source_text used to infer it
-
-    # Return ONLY a valid JSON object with this structure:
-
-    # {{
-    # "age": integer or null,
-    # "age_source_text": string or null,
-    # "gender": "male" | "female" | "not mentioned",
-    # "gender_source_text": string or null,
-    # "diagnosis": string or null,
-    # "diagnosis_source_text": string or null,
-    # "stage": string or null,
-    # "stage_source_text": string or null,
-    # "ecog": string or null,
-    # "ecog_source_text": string or null,
-    # "mutations": list of strings,
-    # "mutations_source_text": list of strings,
-    # "metastases": list of strings,
-    # "metastases_source_text": list of strings,
-    # "previous_treatments": list of strings,
-    # "previous_treatments_source_text": list of strings,
-    # "lab_values": dict,
-    # "lab_values_source_text": dict
-    # }}
-
-    # TEXT:
-    # {text}
-
-    # JSON ONLY OUTPUT:
-    # """
     prompt = f"""
 Sei un modello NLP per l’assegnazione a studi clinici sul carcinoma polmonare.
 
@@ -88,15 +55,20 @@ Schema (senza commenti inline):
   "current_stage": "II" | "III" | "IV" | "not mentioned",
   "line_of_therapy": "1L" | "2L" | ">=3L" | "adjuvant" | "neoadjuvant" | "maintenance" | "not mentioned",
   "pd_l1_tps": "0%" | "<1%" | "1-49%" | ">=50%" | "not mentioned",
-  "biomarkers": "KRAS_G12C" | "EGFR_exon19_del" | "EGFR_L858R" | "EGFR_T790M" | "EGFR_L861Q" | "EGFR_P772R" | "MET_amplification" | "MET_exon14" | "HER2_exon20" | "ALK" | "ROS1" | "RET" | "NTRK" | "BRAF_V600E" | "STK11" | "TP53" | "DNMT3A" | "KRAS_Q61H" | "not mentioned",
-  "brain_metastasis": ["true" | "false" | "not mentioned"],
+  "biomarkers": ["KRAS_G12C" | "EGFR_exon19_del" | "EGFR_L858R" | "EGFR_T790M" | "EGFR_L861Q" | "EGFR_P772R" | "MET_amplification" | "MET_exon14" | "HER2_exon20" | "ALK" | "ROS1" | "RET" | "NTRK" | "BRAF_V600E" | "STK11" | "TP53" | "DNMT3A" | "KRAS_Q61H" ] | ["not mentioned"],
+  "brain_metastasis": ["true" | "false" ],
+  "brain_metastasis_status": "none" | "treated_stable" | "active_symptomatic" | "not mentioned",
   "prior_systemic_therapies": ["carboplatin" | "cisplatin" | "etoposide" | "pemetrexed" | "paclitaxel" | "docetaxel" | "pembrolizumab" | "nivolumab" | "atezolizumab" | "durvalumab" | "osimertinib" | "erlotinib" | "gefitinib" | "sotorasib" | "adagrasib" | "divarasib" | "savolitinib" | "alectinib" | "crizotinib" | "other"] | ["not mentioned"],
-  "comorbidities": ["string"] | ["not mentioned"],
-  "concomitant_treatments": ["string"] | ["not mentioned"],
+  "comorbidities": [list] | ["not mentioned"],
+  "concomitant_treatments": [list] | ["not mentioned"],
+
 }}
 
 Linee guida operative (commenti fuori dallo schema):
-- Per "line_of_therapy": se il testo dice "candidata a terapia sistemica di I linea" → line_of_therapy="1L".
+- Per "histology": se trovi SCLC => "small_cell"
+- Per "line_of_therapy":
+  • Se il testo indica candidabilità, pianificazione o avvio di prima linea → "1L"
+  • NON usare le terapie pianificate per dedurre terapie precedenti
 - Per "pd_l1_tps": usa i bucket esatti richiesti.
 - Per "biomarkers": cerca preferibilmente nelle sezioni "Sintesi Clinica" e "Diagnosi Oncologica".
   Esempi:
@@ -106,14 +78,43 @@ Linee guida operative (commenti fuori dallo schema):
   Esempi:
     • "CNS metastasis" → ["true"]
     • "secondarismi linfonodali, pleurici ed ossei." → ["false"]
-- Per "prior_systemic_therapies": estrarre SOLO trattamenti oncologici già somministrati (non intenzioni future).
+- For "brain_metastasis_status":
+  • "no evidence of brain metastases", "negative brain MRI" → "none"
+  • "previously treated brain metastases", "stable brain metastases", "asymptomatic after radiotherapy" → "treated_stable"
+  • "symptomatic brain metastases", "progressing CNS disease", "requiring steroids" → "active_symptomatic"
+  • If unclear → "not mentioned"
+  
+- Regola hard: "brain_metastasis" può essere "true" SOLO se il testo contiene esplicitamente metastasi cerebrali / CNS metastases.
+- Se il testo contiene esplicitamente NEGATIVITÀ (es. "no brain mets", "encefalo negativo", "negative brain MRI") → brain_metastasis=["false"] e brain_metastasis_status="none".
+- Se NON c’è imaging/menzione esplicita → brain_metastasis=["not mentioned"] e brain_metastasis_status="not mentioned" (NON inventare).
+- Coerenza obbligatoria:
+  • se brain_metastasis=["false"] → brain_metastasis_status MUST be "none"
+  • se brain_metastasis=["not mentioned"] → brain_metastasis_status MUST be "not mentioned"
+  • se brain_metastasis=["true"] → status è "active_symptomatic" o "treated_stable" solo se specificato (altrimenti "not mentioned")
+
+- Regola hard per "prior_systemic_therapies":
+  • Includere SOLO terapie oncologiche già SOMMINISTRATE al paziente.
+  • NON includere terapie:
+      – pianificate
+      – proposte
+      – candidate
+      – da avviare
+      – descritte come “la terapia sarà…”, “verrà avviato…”, “è candidata a…”
+  • Se il testo indica SOLO intenzione o pianificazione terapeutica → "prior_systemic_therapies": ["not mentioned"]
+
   Esempi:
-    • "la terapia sarà carboplatino + pemetrexed" → "prior_systemic_therapies": ["not mentioned"]
-    • "il paziente risulta candidabile a trattamento chemio-immunoterapico di 1° linea a base di sali di platino + etoposide + atezolizumab." → "prior_systemic_therapies": ["not mentioned"]
+    • "la paziente è candidata a carboplatino + etoposide + atezolizumab"
+      → ["not mentioned"]
+
+    • "avvio del trattamento (primo ciclo senza immunoterapia)"
+      → ["not mentioned"]  ❗ finché NON è esplicitamente somministrato
+
+    • "ha già ricevuto 2 cicli di carboplatino + etoposide"
+      → ["carboplatin","etoposide"]
+
 - Per "comorbidities": estrarre SOLO dalla sezione "COMORBIDITÀ".
 - Per "concomitant_treatments": estrarre SOLO dalla sezione "terapie domiciliari" (solo nomi, senza dosi/date).
   Esempio: "Losaprex (losartan)... Omeprazolo..." → ["losartan","omeprazolo"]
-- Per metastasi, preferire i reperti della TC/PET più recente.
 - Qualsiasi informazione assente → "not mentioned" (mai null).
 """
 

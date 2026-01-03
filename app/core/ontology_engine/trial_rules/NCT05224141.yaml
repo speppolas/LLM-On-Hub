@@ -15,14 +15,11 @@ inclusion:
   - id: INC_STAGE
     text: "Extensive-stage disease (Stage IV)"
     field: current_stage
-    condition: equals
-    value: IV
+    condition: ontology_is_a
+    value: Stage_IV
 
-  - id: INC_FIRST_LINE
-    text: "In need of first-line therapy"
-    field: line_of_therapy
-    condition: equals
-    value: "1L"
+
+
 
 exclusion:
   - id: EXC_PRIOR_SCLC
@@ -31,8 +28,14 @@ exclusion:
     condition: not_equals
     value: "1L"
 
-  - id: EXC_CNS
+  - id: EXC_CNS_ACTIVE
     text: "Active CNS metastases"
-    field: brain_metastasis
-    condition: equals
-    value: "true"
+    field: brain_metastasis_status
+    condition: ontology_is_a
+    value: Active_CNS_disease
+
+  - id: EXC_PRIOR_SCLC
+    text: "Prior treatment for SCLC"
+    field: prior_systemic_therapies
+    condition: not_equals
+    value: ["not mentioned"]

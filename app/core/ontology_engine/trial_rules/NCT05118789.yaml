@@ -1,28 +1,5 @@
 trial_id: NCT05118789
-title: ARROS-1 (NVL-520)
+title: unk
 
-policy:
-  inclusion_missing: unknown
-  exclusion_missing: pass
-
-inclusion:
-  - id: INC_AGE
-    field: age
-    condition: gte
-    value: 18
-
-  - id: INC_HISTOLOGY
-    field: histology
-    condition: ontology_is_a
-    value: NSCLC
-
-  - id: INC_BIOMARKER
-    field: biomarkers
-    condition: contains
-    value: ROS1
-
-exclusion:
-  - id: EXC_OTHER_DRIVER
-    field: biomarkers
-    condition: contains_other_than
-    value: ROS1
+inclusion: []
+exclusion: []
