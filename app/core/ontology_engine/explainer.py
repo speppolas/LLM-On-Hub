@@ -8,11 +8,6 @@ def explain_decision_with_llm(
     decision_trace: dict,
     final_decision: str
 ) -> str:
-    """
-    LLM-based explanation layer.
-    MUST NOT change decision.
-    MUST NOT add new facts.
-    """
 
     llm = get_llm_processor()
 

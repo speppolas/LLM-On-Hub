@@ -1,4 +1,5 @@
 # app/core/ontology_engine/rule_evaluator.py
+# app/core/ontology_engine/rule_evaluator.py
 
 from typing import Any, Dict
 
@@ -14,39 +15,62 @@ def evaluate_rule(rule: Dict[str, Any], patient: Dict[str, Any], derived_facts: 
     Returns: "met" | "not_met" | "unknown"
     Deterministic. No LLM.
     """
+
     field = rule.get("field")
     condition = rule.get("condition")
     target = rule.get("value")
 
     patient_value = patient.get(field)
 
-    # Missing handling
-    if patient_value is None or patient_value == "not mentioned" or patient_value == ["not mentioned"]:
+    # ---------------- Missing handling ----------------
+    is_missing = (
+        patient_value is None
+        or patient_value == "not mentioned"
+        or patient_value == ["not mentioned"]
+        or patient_value == []
+    )
+
+    # ⭐ SPECIAL RULE: previous treatments are CLOSED-WORLD
+    if is_missing and field == "prior_systemic_therapies":
+        return "not_met"
+
+    # All other fields → unknown if missing
+    if is_missing:
         return "unknown"
 
-    # Conditions
+    # ---------------- Conditions ----------------
     if condition == "gte":
         try:
             return "met" if float(patient_value) >= float(target) else "not_met"
         except Exception:
             return "unknown"
 
+    if condition == "lte":
+        try:
+            return "met" if float(patient_value) <= float(target) else "not_met"
+        except Exception:
+            return "unknown"
+
+    if condition == "equals":
+        return "met" if patient_value == target else "not_met"
+
+    if condition == "not_equals":
+        return "met" if patient_value != target else "not_met"
+
     if condition == "contains":
         values = _normalize_list(patient_value)
         return "met" if target in values else "not_met"
 
-    if condition == "contains_other_than":
-        # e.g. biomarkers contains a driver other than ROS1
+    if condition == "contains_any":
         values = _normalize_list(patient_value)
-        # if any biomarker not mentioned and != target => met exclusion
+        return "met" if any(x in values for x in target) else "not_met"
+
+    if condition == "contains_other_than":
+        values = _normalize_list(patient_value)
         others = [x for x in values if x != "not mentioned" and x != target]
         return "met" if len(others) > 0 else "not_met"
 
     if condition == "ontology_is_a":
-        # compare derived "xxx_is_a" concept to target
-        # convention: derived_facts has histology_is_a, stage_is_a, ecog_is_a, brain_cns_is_a
-        key = f"{field}_is_a" if not field.endswith("_is_a") else field
-        # special-case if rule uses field=histology/current_stage/ecog_ps/brain_metastasis_status
         if field == "current_stage":
             key = "stage_is_a"
         elif field == "histology":
@@ -55,11 +79,12 @@ def evaluate_rule(rule: Dict[str, Any], patient: Dict[str, Any], derived_facts: 
             key = "ecog_is_a"
         elif field in ("brain_metastasis_status", "brain_metastasis"):
             key = "brain_cns_is_a"
+        else:
+            key = f"{field}_is_a"
 
         val = derived_facts.get(key)
         if val is None:
             return "unknown"
         return "met" if val == target else "not_met"
 
-    # Unknown condition
     return "unknown"
