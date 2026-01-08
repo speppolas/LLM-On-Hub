@@ -1,5 +1,5 @@
 trial_id: NCT05224141
-title: ES-SCLC First-Line MK-7684A vs Atezolizumab
+title: MK-7684A + Etoposide/Platinum (ES-SCLC)
 
 policy:
   inclusion_missing: unknown
@@ -19,23 +19,45 @@ inclusion:
     value: Stage_IV
 
 
-
-
-exclusion:
-  - id: EXC_PRIOR_SCLC
-    text: "Prior treatment for SCLC"
+  - id: INC_FIRST_LINE
+    text: "Eligible for first-line systemic therapy"
     field: line_of_therapy
-    condition: not_equals
+    condition: equals
     value: "1L"
 
-  - id: EXC_CNS_ACTIVE
-    text: "Active CNS metastases"
+exclusion:
+  - id: EXC_ACTIVE_CNS
+    text: "Known active central nervous system metastases or carcinomatous meningitis"
     field: brain_metastasis_status
     condition: ontology_is_a
     value: Active_CNS_disease
 
-  - id: EXC_PRIOR_SCLC
-    text: "Prior treatment for SCLC"
-    field: prior_systemic_therapies
-    condition: not_equals
-    value: ["not mentioned"]
+  - id: EXC_AUTOIMMUNE
+    text: "Active autoimmune disease requiring systemic treatment within the past 2 years"
+    field: comorbidities
+    condition: contains_any
+    value: ["autoimmune_disease"]
+
+  - id: EXC_PULMONARY_ILD
+    text: "History of noninfectious pneumonitis or interstitial lung disease requiring steroids, or current ILD"
+    field: comorbidities
+    condition: contains_any
+    value: ["ILD", "pneumonitis"]
+
+  - id: EXC_NEURO_PARANEOPLASTIC
+    text: "Known history of or active neurologic paraneoplastic syndrome"
+    field: comorbidities
+    condition: contains_any
+    value: ["paraneoplastic_neurologic_syndrome"]
+
+  - id: EXC_ACTIVE_INFECTION
+    text: "Active infection requiring systemic therapy"
+    field: comorbidities
+    condition: contains_any
+    value: ["active_infection"]
+
+  - id: EXC_VIRAL_INFECTION
+    text: "Known history of HIV infection, or active hepatitis B or C infection"
+    field: comorbidities
+    condition: contains_any
+    value: ["HIV", "HBV", "HCV"]

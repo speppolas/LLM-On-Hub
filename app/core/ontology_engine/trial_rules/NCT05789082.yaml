@@ -1,51 +1,63 @@
+# --- TRIAL 3: KRASCENDO 170 ---
 trial_id: NCT05789082
-title: KRASCENDO 170 – Divarasib (KRAS G12C)
+title: KRASCENDO 170 (Divarasib – KRAS G12C)
 
 policy:
   inclusion_missing: unknown
   exclusion_missing: pass
 
 inclusion:
-  - id: INC_NSCLC
-    text: "Advanced or metastatic NSCLC"
+  - id: INC_HISTOLOGY
+    text: Advanced or metastatic NSCLC
     field: histology
     condition: ontology_is_a
     value: NSCLC
 
-  - id: INC_KRAS
-    text: "KRAS G12C mutation"
+  - id: INC_STAGE
+    text: Metastatic disease
+    field: current_stage
+    condition: equals
+    value: "IV"
+
+  - id: INC_KRAS_G12C
+    text: KRAS G12C mutation
     field: biomarkers
     condition: contains
-    value: "KRAS_G12C"
+    value: KRAS_G12C
 
   - id: INC_FIRST_LINE
-    text: "Previously untreated"
+    text: First-line systemic therapy
     field: line_of_therapy
     condition: equals
     value: "1L"
 
   - id: INC_ECOG
-    text: "ECOG 0–1"
+    text: ECOG performance status 0–1
     field: ecog_ps
     condition: lte
     value: 1
 
 exclusion:
   - id: EXC_SQUAMOUS
-    text: "Squamous cell histology"
+    text: Squamous histology
     field: histology
     condition: equals
-    value: "squamous"
-
-  - id: EXC_CNS_ACTIVE
-    text: "Symptomatic or progressing CNS metastases"
-    field: brain_metastasis_status
-    condition: ontology_is_a
-    value: Active_CNS_disease
-
+    value: squamous
 
   - id: EXC_PRIOR_KRAS
-    text: "Prior KRAS G12C inhibitor"
+    text: Prior KRAS G12C inhibitor treatment
     field: prior_systemic_therapies
     condition: contains_any
     value: ["sotorasib", "adagrasib"]
+
+  - id: EXC_ACTIVE_CNS
+    text: Active or symptomatic CNS metastases
+    field: brain_metastasis_status
+    condition: equals
+    value: active_symptomatic
+
+  - id: EXC_PULMONARY_COMORBIDITY
+    text: History of interstitial lung disease or pneumonitis
+    field: comorbidities
+    condition: contains_any
+    value: ["ILD", "pneumonitis"]

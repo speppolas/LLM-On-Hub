@@ -43,6 +43,7 @@ def decide_overall(inclusions: List[dict], exclusions: List[dict]) -> str:
     - Any exclusion MET -> NOT eligible
     - Any inclusion NOT_MET -> NOT eligible
     - Any inclusion UNKNOWN -> UNKNOWN
+    - Any exclusion UNKNOWN -> UNKNOWN
     - Otherwise -> ELIGIBLE
     """
 
@@ -54,6 +55,10 @@ def decide_overall(inclusions: List[dict], exclusions: List[dict]) -> str:
         if exc["status"] == "met":
             return "not_eligible"
 
+    for exc in exclusions:
+        if exc["status"] == "unknown":
+            return "unknown"
+        
     for inc in inclusions:
         if inc["status"] == "not_met":
             return "not_eligible"

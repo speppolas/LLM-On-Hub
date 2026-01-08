@@ -28,6 +28,24 @@ def extract_text_from_pdf(pdf_file: Union[str, bytes]) -> str:
     except Exception as e:
         logger.error(f"Error extracting text from PDF: {str(e)}")
         raise Exception(f"Unable to extract text from PDF: {str(e)}")
+def normalize_llm_features(features: dict) -> dict:
+    LIST_FIELDS = [
+        "biomarkers",
+        "prior_systemic_therapies",
+        "comorbidities",
+        "concomitant_treatments",
+        "brain_metastasis"
+    ]
+
+    for field in LIST_FIELDS:
+        if field in features:
+            value = features[field]
+
+            # Empty list → epistemic unknown
+            if isinstance(value, list) and len(value) == 0:
+                features[field] = ["not mentioned"]
+
+    return features
 
 def extract_features_with_llm(text: str) -> Dict[str, Any]:
     from app.core.llm_processor import get_llm_processor
@@ -55,7 +73,7 @@ Schema (senza commenti inline):
   "current_stage": "II" | "III" | "IV" | "not mentioned",
   "line_of_therapy": "1L" | "2L" | ">=3L" | "adjuvant" | "neoadjuvant" | "maintenance" | "not mentioned",
   "pd_l1_tps": "0%" | "<1%" | "1-49%" | ">=50%" | "not mentioned",
-  "biomarkers": ["KRAS_G12C" | "EGFR_exon19_del" | "EGFR_L858R" | "EGFR_T790M" | "EGFR_L861Q" | "EGFR_P772R" | "MET_amplification" | "MET_exon14" | "HER2_exon20" | "ALK" | "ROS1" | "RET" | "NTRK" | "BRAF_V600E" | "STK11" | "TP53" | "DNMT3A" | "KRAS_Q61H" ] | ["not mentioned"],
+  "biomarkers": ["KRAS_G12C" | "ALK rearrangement"| "EGFR_exon19_del" | "EGFR_L858R" | "EGFR_T790M" | "EGFR_L861Q" | "EGFR_P772R" | "MET_amplification" | "MET_exon14" | "HER2_exon20" | "ALK" | "ROS1" | "RET" | "NTRK" | "BRAF_V600E" | "STK11" | "TP53" | "DNMT3A" | "KRAS_Q61H" ] | ["not mentioned"],
   "brain_metastasis": ["true" | "false" ],
   "brain_metastasis_status": "none" | "treated_stable" | "active_symptomatic" | "not mentioned",
   "prior_systemic_therapies": ["carboplatin" | "cisplatin" | "etoposide" | "pemetrexed" | "paclitaxel" | "docetaxel" | "pembrolizumab" | "nivolumab" | "atezolizumab" | "durvalumab" | "osimertinib" | "erlotinib" | "gefitinib" | "sotorasib" | "adagrasib" | "divarasib" | "savolitinib" | "alectinib" | "crizotinib" | "other"] | ["not mentioned"],
@@ -112,7 +130,7 @@ Linee guida operative (commenti fuori dallo schema):
     • "ha già ricevuto 2 cicli di carboplatino + etoposide"
       → ["carboplatin","etoposide"]
 
-- Per "comorbidities": estrarre SOLO dalla sezione "COMORBIDITÀ".
+- Per "comorbidities": guarda attentamente la sezione "COMORBIDITÀ". 
 - Per "concomitant_treatments": estrarre SOLO dalla sezione "terapie domiciliari" (solo nomi, senza dosi/date).
   Esempio: "Losaprex (losartan)... Omeprazolo..." → ["losartan","omeprazolo"]
 - Qualsiasi informazione assente → "not mentioned" (mai null).
@@ -139,7 +157,8 @@ Linee guida operative (commenti fuori dallo schema):
         resp_json = json.loads(response)      
         llm_text_str = resp_json['response']
         llm_text = json.loads(llm_text_str)  if isinstance(llm_text_str, str) else llm_text_str
-
+        llm_text = normalize_llm_features(llm_text)
+        
         if not isinstance(llm_text, dict):
             logger.error(f"❌ LLM response is not a valid JSON object: {llm_text}")
             return {}
@@ -153,6 +172,7 @@ Linee guida operative (commenti fuori dallo schema):
     except Exception as e:
         logger.error(f"❌ Unexpected error in feature extraction: {e}")
         return {}
+
 
 def highlight_sources(text: str, features: Dict[str, Any]) -> str:
     for key, value in features.items():

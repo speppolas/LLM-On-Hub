@@ -21,13 +21,58 @@ histology:
     concept: NSCLC
   squamous:
     concept: NSCLC
+  nonsquamous:
+    concept: NSCLC
   small_cell:
     concept: SCLC
+
 
 current_stage:
   II:
     concept: Stage_II
   III:
     concept: Stage_III
+  IIIA:
+    concept: Stage_III
+  IIIB:
+    concept: Stage_III
+  IIIC:
+    concept: Stage_III
   IV:
     concept: Stage_IV
+  IVa:
+    concept: Stage_IV
+  IVb:
+    concept: Stage_IV
+  IVc:
+    concept: Stage_IV
+
+
+line_of_therapy:
+  1L:
+    concept: First_line
+  2L:
+    concept: Second_line
+  ">=3L":
+    concept: Later_line
+  adjuvant:
+    concept: Adjuvant
+  neoadjuvant:
+    concept: Neoadjuvant
+
+
+biomarkers:
+  KRAS_G12C:
+    concept: KRAS_G12C
+  EGFR_exon19_del:
+    concept: EGFR_sensitizing
+  EGFR_L858R:
+    concept: EGFR_sensitizing
+  EGFR_T790M:
+    concept: EGFR_resistance
+  MET_amplification:
+    concept: MET_altered
+  HER2_exon20:
+    concept: HER2_altered
+
+

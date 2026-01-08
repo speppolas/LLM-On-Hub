@@ -1,5 +1,4 @@
 # app/core/ontology_engine/rule_evaluator.py
-# app/core/ontology_engine/rule_evaluator.py
 
 from typing import Any, Dict
 
@@ -10,12 +9,8 @@ def _normalize_list(v: Any):
         return v
     return [v]
 
-def evaluate_rule(rule: Dict[str, Any], patient: Dict[str, Any], derived_facts: Dict[str, Any]) -> str:
-    """
-    Returns: "met" | "not_met" | "unknown"
-    Deterministic. No LLM.
-    """
 
+def evaluate_rule(rule: Dict[str, Any], patient: Dict[str, Any], derived_facts: Dict[str, Any]) -> str:
     field = rule.get("field")
     condition = rule.get("condition")
     target = rule.get("value")
@@ -33,7 +28,8 @@ def evaluate_rule(rule: Dict[str, Any], patient: Dict[str, Any], derived_facts: 
     # ⭐ SPECIAL RULE: previous treatments are CLOSED-WORLD
     if is_missing and field == "prior_systemic_therapies":
         return "not_met"
-
+    if is_missing and field == "comorbidities":
+        return "not_met"
     # All other fields → unknown if missing
     if is_missing:
         return "unknown"
