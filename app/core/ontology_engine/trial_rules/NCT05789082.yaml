@@ -61,3 +61,9 @@ exclusion:
     field: comorbidities
     condition: contains_any
     value: ["ILD", "pneumonitis"]
+
+  - id: EXC_OTHER_DRIVER
+    text: Other actionable oncogenic driver
+    field: biomarkers
+    condition: contains_other_than
+    value: DRIVER_KRAS_G12C

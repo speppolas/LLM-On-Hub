@@ -1,0 +1,122 @@
+trial_id: NCT05609968
+title: KEYNOTE D46 / EVOKE-03 – PD-L1 ≥50% mNSCLC (1L)
+
+inclusion:
+  - id: INC_NSCLC
+    field: histology
+    condition: ontology_is_a
+    value: NSCLC
+    text: Metastatic NSCLC
+
+  - id: INC_PDL1_HIGH
+    field: pd_l1_tps
+    condition: ontology_is_a
+    value: PDL1_HIGH
+    text: PD-L1 TPS ≥50%
+
+  - id: EXC_PRIMARY_TARGETABLE_DRIVER
+    field: biomarkers
+    condition: contains_any
+    value:
+      - DRIVER_EGFR_SENSITIZING
+      - DRIVER_ALK
+      - DRIVER_ROS1
+    text: EGFR-, ALK-, or ROS1-directed therapy indicated as primary therapy
+
+
+
+exclusion:
+
+  # ----------------------------
+  # PRIOR SYSTEMIC THERAPY (1L)
+  # ----------------------------
+  - id: EXC_PRIOR_SYSTEMIC_THERAPY
+    field: prior_systemic_therapies
+    condition: not_equals
+    value: not mentioned
+    text: Prior systemic chemotherapy or targeted/biological therapy for metastatic NSCLC
+
+
+  # ----------------------------
+  # PRIOR IMMUNOTHERAPY
+  # ----------------------------
+  - id: EXC_PRIOR_IO
+    field: prior_systemic_therapies
+    condition: contains_any
+    value:
+      - pembrolizumab
+      - nivolumab
+      - atezolizumab
+      - durvalumab
+      - cemiplimab
+    text: Prior anti–PD-1/PD-L1/PD-L2 or other T-cell checkpoint therapy
+
+
+  # ----------------------------
+  # ACTIVE CNS DISEASE
+  # ----------------------------
+  - id: EXC_ACTIVE_CNS
+    field: brain_metastasis_status
+    condition: ontology_is_a
+    value: Active_CNS_disease
+    text: Active CNS metastases or carcinomatous meningitis
+
+
+  # ----------------------------
+  # AUTOIMMUNE / IMMUNE CONDITIONS
+  # ----------------------------
+  - id: EXC_AUTOIMMUNE
+    field: comorbidities
+    condition: contains_any
+    value:
+      - rheumatoid arthritis
+    text: Active autoimmune disease requiring systemic treatment in the past 2 years (proxy)
+
+
+  - id: EXC_IMMUNODEFICIENCY
+    field: comorbidities
+    condition: contains
+    value: immunodeficiency
+    text: Immunodeficiency or immunosuppressive condition
+
+
+  # ----------------------------
+  # IBD (proxy via autoimmune bucket)
+  # ----------------------------
+  - id: EXC_INFLAMMATORY_BOWEL_DISEASE
+    field: comorbidities
+    condition: contains
+    value: inflammatory bowel disease
+    text: Active chronic inflammatory bowel disease (if explicitly reported)
+
+
+  # ----------------------------
+  # PNEUMONITIS / ILD
+  # ----------------------------
+  - id: EXC_ILD_PNEUMONITIS
+    field: comorbidities
+    condition: contains_any
+    value:
+      - ILD
+      - pneumonitis
+    text: History of pneumonitis or interstitial lung disease requiring steroids
+
+
+  # ----------------------------
+  # ACTIVE INFECTION
+  # ----------------------------
+  - id: EXC_ACTIVE_INFECTION
+    field: comorbidities
+    condition: contains
+    value: active infection
+    text: Active infection requiring systemic therapy
+
+
+  # ----------------------------
+  # CARDIAC DISEASE (VERY CONSERVATIVE PROXY)
+  # ----------------------------
+  - id: EXC_CARDIAC_DISEASE
+    field: comorbidities
+    condition: contains
+    value: myocardial infarction
+    text: Significant cardiac disease 

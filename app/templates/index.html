@@ -104,6 +104,20 @@
     </div>
   </div>
 </div>
+
+<div id="screening-summary" class="card mt-3 d-none">
+  <div class="card-header">
+    <h5 class="card-header-title">⏱ Screening Time Summary</h5>
+  </div>
+  <div class="card-body">
+    <ul class="mb-0">
+      <li><strong>Feature extraction (LLM):</strong> <span id="t-feat"></span> ms</li>
+      <li><strong>Trial matching:</strong> <span id="t-match"></span> ms</li>
+      <li><strong>Total screening:</strong> <span id="t-total"></span> ms</li>
+    </ul>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}

@@ -1,0 +1,39 @@
+trial_id: NCT05676931
+title: IO Platform Study – Advanced NSCLC
+
+inclusion:
+
+  - id: INC_NSCLC
+    field: histology
+    condition: ontology_is_a
+    value: NSCLC
+    text: Histologically or cytologically documented NSCLC
+
+  - id: INC_STAGE_IV
+    field: current_stage
+    condition: ontology_is_a
+    value: Stage_IV
+    text: Stage IV metastatic disease
+
+  - id: INC_ECOG_0_1
+    or:
+      - field: ecog_ps
+        condition: ontology_is_a
+        value: ECOG_0
+      - field: ecog_ps
+        condition: ontology_is_a
+        value: ECOG_1
+    text: ECOG performance status 0–1
+
+
+exclusion:
+
+  - id: EXC_ACTIVE_AUTOIMMUNE
+    field: comorbidities
+    condition: contains_any
+    value:
+      - autoimmune disease
+      - rheumatoid arthritis
+      - lupus
+      - inflammatory bowel disease
+    text: Active autoimmune disease requiring systemic treatment in the past 2 years

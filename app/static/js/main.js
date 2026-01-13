@@ -125,9 +125,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Display the extracted features and matched trials
     function displayResults(data) {
-        displayFeatures(data.features);
-        displayMatches(data.matched_trials);
-    }
+    displayFeatures(data.features);
+    displayMatches(data.matched_trials);
+
+    if (data.screening_time) {
+  renderScreeningSummary(data.screening_time);
+}
+
+}
+
 
     // Display extracted features
     function displayFeatures(features) {
@@ -158,6 +164,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Display matched clinical trials
+
+
+function renderScreeningSummary(screening_time) {
+  document.getElementById("t-feat").textContent =
+    formatTime(screening_time.feature_extraction_ms);
+
+  document.getElementById("t-match").textContent =
+    formatTime(screening_time.trial_matching_ms);
+
+  document.getElementById("t-total").textContent =
+    formatTime(screening_time.total_ms);
+
+  document.getElementById("screening-summary").classList.remove("d-none");
+}
+
+
+function formatTime(ms) {
+  if (ms < 1000) {
+    return `${ms.toFixed(2)} ms`;
+  } else if (ms < 60000) {
+    return `${(ms / 1000).toFixed(2)} s`;
+  } else {
+    const min = Math.floor(ms / 60000);
+    const sec = ((ms % 60000) / 1000).toFixed(1);
+    return `${min} min ${sec} s`;
+  }
+}
 
 
 

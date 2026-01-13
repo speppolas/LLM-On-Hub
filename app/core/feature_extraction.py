@@ -47,11 +47,52 @@ def normalize_llm_features(features: dict) -> dict:
 
     return features
 
+
+
+def normalize_prior_vs_concomitant(patient: dict) -> dict:
+    prior = set(patient.get("prior_systemic_therapies", []))
+    concomitant = set(patient.get("concomitant_treatments", []))
+
+    # Se un farmaco è concomitante, NON può essere prior
+    cleaned_prior = [
+        x for x in prior
+        if x not in concomitant and x != "not mentioned"
+    ]
+
+    if not cleaned_prior:
+        patient["prior_systemic_therapies"] = ["not mentioned"]
+    else:
+        patient["prior_systemic_therapies"] = cleaned_prior
+
+    return patient
+def extract_first_json_object(text: str) -> dict:
+    """
+    Extracts the first valid JSON object from a string.
+    Robust to markdown, explanations, code fences.
+    """
+    import json
+
+    start = text.find("{")
+    if start == -1:
+        raise ValueError("No JSON object start found")
+
+    depth = 0
+    for i in range(start, len(text)):
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                candidate = text[start:i+1]
+                return json.loads(candidate)
+
+    raise ValueError("No complete JSON object found")
+
 def extract_features_with_llm(text: str) -> Dict[str, Any]:
     from app.core.llm_processor import get_llm_processor
     llm = get_llm_processor()
     prompt = f"""
-Sei un modello NLP per l’assegnazione a studi clinici sul carcinoma polmonare.
+Sei un modello NLP per l’estrazione strutturata di dati clinici sul carcinoma polmonare.
 
 Data la seguente cartella clinica STRUTTURATA usando l’estrazione BASATA SU SEZIONI:
 
@@ -64,77 +105,124 @@ Restituisci UNO e SOLO UNO oggetto JSON che rispetti ESATTAMENTE lo schema e le 
 - Quando sono richieste liste, restituisci un array JSON. Se non è menzionato nulla, restituisci ["not mentioned"].
 - Normalizza i nomi in inglese quando possibile (es. carboplatino → carboplatin; linfonodali → lymph nodes).
 
-Schema (senza commenti inline):
+========================
+SCHEMA JSON (OBBLIGATORIO)
+========================
+
 {{
   "age": int | "not mentioned",
   "gender": "male" | "female" | "not mentioned",
-  "ecog_ps": 0 | 1 | 2 | "not mentioned",
+  "ecog_ps": "0" | "1" | "2" | "not mentioned",
   "histology": "squamous" | "adenocarcinoma" | "small_cell" | "not mentioned",
   "current_stage": "II" | "III" | "IV" | "not mentioned",
   "line_of_therapy": "1L" | "2L" | ">=3L" | "adjuvant" | "neoadjuvant" | "maintenance" | "not mentioned",
-  "pd_l1_tps": "0%" | "<1%" | "1-49%" | ">=50%" | "not mentioned",
+  "pd_l1_tps": "0%" | "<1%" | "1-49%" | ">=50%" | "not mentioned" #cerca PD-L1/TPS
   "biomarkers": ["KRAS_G12C" | "ALK rearrangement"| "EGFR_exon19_del" | "EGFR_L858R" | "EGFR_T790M" | "EGFR_L861Q" | "EGFR_P772R" | "MET_amplification" | "MET_exon14" | "HER2_exon20" | "ALK" | "ROS1" | "RET" | "NTRK" | "BRAF_V600E" | "STK11" | "TP53" | "DNMT3A" | "KRAS_Q61H" ] | ["not mentioned"],
-  "brain_metastasis": ["true" | "false" ],
+  "brain_metastasis": ["true" | "false"],
   "brain_metastasis_status": "none" | "treated_stable" | "active_symptomatic" | "not mentioned",
-  "prior_systemic_therapies": ["carboplatin" | "cisplatin" | "etoposide" | "pemetrexed" | "paclitaxel" | "docetaxel" | "pembrolizumab" | "nivolumab" | "atezolizumab" | "durvalumab" | "osimertinib" | "erlotinib" | "gefitinib" | "sotorasib" | "adagrasib" | "divarasib" | "savolitinib" | "alectinib" | "crizotinib" | "other"] | ["not mentioned"],
-  "comorbidities": [list] | ["not mentioned"],
-  "concomitant_treatments": [list] | ["not mentioned"],
+  "prior_systemic_therapies": ["osimertinib",
+  "erlotinib","gefitinib","alectinib",
+  "lorlatinib",
+  "amivantamab",
+  "carboplatin","cisplatin","pemetrexed","etoposide","vinorelbine","gemcitabine", "topotecan",
+  "pembrolizumab", "nivolumab", "atezolizumab", "durvalumab", "cemiplimab",
+  "bevacizumab"
+] | ["not mentioned"],
+  "comorbidities": ["hypertension", "immunodeficiency","inflammatory bowel disease", "autoimmune disease", "active infection", "ILD", "pneumonitis", "COPD", "type 2 diabetes", "myocardial infarction",
+  "transient ischemic attack", "obstructive sleep apnea",
+  "benign prostatic hyperplasia", "dyslipidemia",
+  "asthma", "hypothyroidism", "gastritis", "hepatic steatosis",
+  "nasal polyposis", "extrasystole", "osteoporosis",
+  "rheumatoid arthritis", "vulvar lichen",
+  "previous Hodgkin lymphoma", "previous thyroid cancer",
+  "previous testicular seminoma", "previous breast cancer",
+  "previous colon cancer", "previous melanoma"] | ["not mentioned"],
+  "concomitant_treatments": ["radiotherapy (brain)", "radiotherapy (bone)", "radiotherapy (lung)",
+    "radiotherapy (liver)", "radiotherapy (adjuvant)",
+    "radiotherapy (panencephalic)", "radiotherapy (stereotactic)",
+    "chemoradiotherapy", "surgery", "neurosurgery"] | ["not mentioned"]
 
 }}
 
-Linee guida operative (commenti fuori dallo schema):
-- Per "histology": se trovi SCLC => "small_cell"
-- Per "line_of_therapy":
-  • Se il testo indica candidabilità, pianificazione o avvio di prima linea → "1L"
-  • NON usare le terapie pianificate per dedurre terapie precedenti
-- Per "pd_l1_tps": usa i bucket esatti richiesti.
-- Per "biomarkers": cerca preferibilmente nelle sezioni "Sintesi Clinica" e "Diagnosi Oncologica".
-  Esempi:
-    • "EGFR Exon 19 deletion rilevata" → "biomarkers": "EGFR_exon19_del"
-    • "KRAS ... (Q61H) 34%" → "biomarkers": "KRAS_Q61H"
-- Per "brain_metastasis": preferisci la TC/PET più recente.
-  Esempi:
-    • "CNS metastasis" → ["true"]
-    • "secondarismi linfonodali, pleurici ed ossei." → ["false"]
-- For "brain_metastasis_status":
-  • "no evidence of brain metastases", "negative brain MRI" → "none"
-  • "previously treated brain metastases", "stable brain metastases", "asymptomatic after radiotherapy" → "treated_stable"
-  • "symptomatic brain metastases", "progressing CNS disease", "requiring steroids" → "active_symptomatic"
-  • If unclear → "not mentioned"
-  
-- Regola hard: "brain_metastasis" può essere "true" SOLO se il testo contiene esplicitamente metastasi cerebrali / CNS metastases.
-- Se il testo contiene esplicitamente NEGATIVITÀ (es. "no brain mets", "encefalo negativo", "negative brain MRI") → brain_metastasis=["false"] e brain_metastasis_status="none".
-- Se NON c’è imaging/menzione esplicita → brain_metastasis=["not mentioned"] e brain_metastasis_status="not mentioned" (NON inventare).
-- Coerenza obbligatoria:
-  • se brain_metastasis=["false"] → brain_metastasis_status MUST be "none"
-  • se brain_metastasis=["not mentioned"] → brain_metastasis_status MUST be "not mentioned"
-  • se brain_metastasis=["true"] → status è "active_symptomatic" o "treated_stable" solo se specificato (altrimenti "not mentioned")
+========================
+REGOLE CLINICHE CHIAVE
+========================
 
-- Regola hard per "prior_systemic_therapies":
-  • Includere SOLO terapie oncologiche già SOMMINISTRATE al paziente.
-  • NON includere terapie:
-      – pianificate
-      – proposte
-      – candidate
-      – da avviare
-      – descritte come “la terapia sarà…”, “verrà avviato…”, “è candidata a…”
-  • Se il testo indica SOLO intenzione o pianificazione terapeutica → "prior_systemic_therapies": ["not mentioned"]
+HISTOLOGY
+- Se trovi SCLC → "small_cell"
+- current_stage = "IV" se metastasi a distanza sono MAI menzionate.
 
+LINE_OF_THERAPY
+• Se il testo indica candidabilità, pianificazione o avvio di prima linea → "1L"
+- Se non chiaramente indicata → "not mentioned".
+
+PD-L1
+- Estrarre SEMPRE se presente nel testo, anche se EGFR/ALK positivi.
+- Mappare solo nei bucket consentiti: "0%" | "<1%" | "1-49%" | ">=50%"
+-  quidni se trovi PD-L1: 70% -> ">=50%"
+
+BIOMARKERS
+- Usa SOLO i valori consentiti.
+- Cerca preferibilmente in “Diagnosi”, “Istologia”, “Biologia Molecolare”.
+
+BRAIN METASTASIS
+- brain_metastasis=["true"] SOLO se il testo menziona esplicitamente
+  metastasi cerebrali / CNS metastases.
+- brain_metastasis_status:
+   • se brain_metastasis=["false"] → brain_metastasis_status MUST be "none"
+  • "treated_stable" SOLO se è esplicitamente indicato trattamento locale
+    già completato (RT o chirurgia) e assenza di sintomi/progressione.
+  • "active_symptomatic" SOLO se sono esplicitamente menzionati
+    sintomi neurologici, progressione o necessità di steroidi.
+  • In assenza di indicazioni chiare → "false".
+
+PRIOR_SYSTEMIC_THERAPIES
+- Includi SOLO terapie sistemiche GIÀ SOMMINISTRATE.
+- Considera come somministrate frasi come:
+  "in trattamento con", "ha ricevuto", "precedentemente trattata con",
+  "dopo fallimento di", "in progressione dopo".
+- Escludi terapie pianificate, proposte o da iniziare.
+- Chirurgia e radioterapia NON sono terapie sistemiche.
   Esempi:
     • "la paziente è candidata a carboplatino + etoposide + atezolizumab"
       → ["not mentioned"]
-
     • "avvio del trattamento (primo ciclo senza immunoterapia)"
-      → ["not mentioned"]  ❗ finché NON è esplicitamente somministrato
-
+      → ["not mentioned"]  
     • "ha già ricevuto 2 cicli di carboplatino + etoposide"
       → ["carboplatin","etoposide"]
 
-- Per "comorbidities": guarda attentamente la sezione "COMORBIDITÀ". 
-- Per "concomitant_treatments": estrarre SOLO dalla sezione "terapie domiciliari" (solo nomi, senza dosi/date).
-  Esempio: "Losaprex (losartan)... Omeprazolo..." → ["losartan","omeprazolo"]
-- Qualsiasi informazione assente → "not mentioned" (mai null).
+
+COMORBIDITIES
+- guarda attentamente la sezione "COMORBIDITÀ" nella sottosezione "Oncologiche:". 
+- Includi condizioni non oncologiche e neoplasie pregresse.
+- Normalizza in inglese (es. "lichen vulvare" → "vulvar lichen").
+- Abbreviazioni comuni:
+- IPA → hypertension
+- BPCO → COPD
+- DM II → type 2 diabetes
+- IMA → myocardial infarction
+- TIA → transient ischemic attack
+- OSAS → obstructive sleep apnea
+- IPB → benign prostatic hyperplasia
+
+
+CONCOMITANT_TREATMENTS
+- Includi SOLO trattamenti oncologici LOCALI (RT, chirurgia, chemioradioterapia).
+- Escludi sempre farmaci sistemici.
+
+
+========================
+FINAL INSTRUCTION
+========================
+Restituisci ORA SOLO l’oggetto JSON.
 """
+
+
+
+
+
+
+
 
     logger.info(f"Prompt sent to LLM:\n{prompt[:2000]}")  # Log the prompt snippet
     
@@ -156,8 +244,10 @@ Linee guida operative (commenti fuori dallo schema):
         # Parse the LLM response to get 'llm_text'
         resp_json = json.loads(response)      
         llm_text_str = resp_json['response']
-        llm_text = json.loads(llm_text_str)  if isinstance(llm_text_str, str) else llm_text_str
+        llm_text = extract_first_json_object(llm_text_str)
         llm_text = normalize_llm_features(llm_text)
+        llm_text = normalize_prior_vs_concomitant(llm_text)
+
         
         if not isinstance(llm_text, dict):
             logger.error(f"❌ LLM response is not a valid JSON object: {llm_text}")

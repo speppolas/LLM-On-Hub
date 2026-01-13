@@ -1,0 +1,76 @@
+trial_id: NCT06305754
+title: MK-2870 vs Platinum – Post-EGFR Advanced NSCLC
+
+inclusion:
+
+  - id: INC_NSCLC
+    field: histology
+    condition: ontology_is_a
+    value: NSCLC
+    text: Histologically confirmed non-small cell lung cancer
+
+  - id: INC_ADVANCED_STAGE
+    field: current_stage
+    condition: ontology_is_a
+    value: Stage_IV
+    text: Advanced or metastatic disease
+
+  - id: INC_EGFR_MUT
+    field: biomarkers
+    condition: contains
+    value: DRIVER_EGFR_SENSITIZING
+    text: EGFR-mutated NSCLC
+
+  - id: INC_POST_EGFR_TKI
+    field: prior_systemic_therapies
+    condition: contains_any
+    value:
+      - osimertinib
+      - erlotinib
+      - gefitinib
+      - afatinib
+    text: Progression after prior EGFR tyrosine kinase inhibitor
+
+
+exclusion:
+
+  - id: EXC_SQUAMOUS
+    field: histology
+    condition: equals
+    value: squamous
+    text: Predominantly squamous histology NSCLC
+
+  - id: EXC_ACTIVE_CNS
+    field: brain_metastasis_status
+    condition: ontology_is_a
+    value: Active_CNS_disease
+    text: Active CNS metastases or carcinomatous meningitis
+
+  - id: EXC_PNEUMONITIS_ILD
+    field: comorbidities
+    condition: contains_any
+    value:
+      - interstitial lung disease
+      - pneumonitis
+    text: History of ILD or pneumonitis requiring steroids
+
+  - id: EXC_IBD
+    field: comorbidities
+    condition: contains_any
+    value:
+      - inflammatory bowel disease
+      - crohn disease
+      - ulcerative colitis
+    text: Active or prior inflammatory bowel disease
+
+  - id: EXC_ACTIVE_INFECTION
+    field: comorbidities
+    condition: contains
+    value: active infection
+    text: Active infection requiring systemic therapy
+
+  - id: EXC_ORGAN_TRANSPLANT
+    field: comorbidities
+    condition: contains
+    value: solid organ transplant
+    text: History of allogeneic tissue or solid organ transplant

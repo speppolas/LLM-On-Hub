@@ -8,6 +8,23 @@ ecog_ps:
   2:
     concept: ECOG_2
 
+
+pd_l1_tps:
+  "0%":
+    concept: PDL1_NEGATIVE
+  "<1%":
+    concept: PDL1_NEGATIVE
+  "1-49%":
+    concept: PDL1_LOW
+  ">=50%":
+    concept: PDL1_HIGH
+  ">70%":
+    concept: PDL1_HIGH
+  ">90%":
+    concept: PDL1_HIGH
+
+
+
 brain_metastasis_status:
   none:
     concept: No_CNS_disease
@@ -34,9 +51,15 @@ current_stage:
     concept: Stage_III
   IIIA:
     concept: Stage_III
+  IIIa:
+    concept: Stage_III
   IIIB:
     concept: Stage_III
+  IIIb:
+    concept: Stage_III
   IIIC:
+    concept: Stage_III
+  IIIc:
     concept: Stage_III
   IV:
     concept: Stage_IV
@@ -60,19 +83,39 @@ line_of_therapy:
   neoadjuvant:
     concept: Neoadjuvant
 
-
 biomarkers:
+  ALK_REARRANGEMENT:
+    concept: DRIVER_ALK
+
+  STK11:
+    concept: STK11_MUTATION
+
   KRAS_G12C:
-    concept: KRAS_G12C
-  EGFR_exon19_del:
-    concept: EGFR_sensitizing
+    concept: DRIVER_KRAS_G12C
+
+  EGFR_EXON19_DEL:
+    concept: DRIVER_EGFR_SENSITIZING
   EGFR_L858R:
-    concept: EGFR_sensitizing
+    concept: DRIVER_EGFR_SENSITIZING
   EGFR_T790M:
-    concept: EGFR_resistance
-  MET_amplification:
-    concept: MET_altered
-  HER2_exon20:
-    concept: HER2_altered
+    concept: DRIVER_EGFR_RESISTANCE
 
+  MET_AMPLIFICATION:
+    concept: DRIVER_MET
 
+  HER2_EXON20:
+    concept: DRIVER_HER2_ACTIVATING
+  HER2_MUT:
+    concept: DRIVER_HER2_ACTIVATING
+  HER2_TKD:
+    concept: DRIVER_HER2_ACTIVATING
+  HER2_ACTIVATING:
+    concept: DRIVER_HER2_ACTIVATING
+
+  ERBB2_EXON20:
+    concept: DRIVER_HER2_ACTIVATING
+  ERBB2_TKD:
+    concept: DRIVER_HER2_ACTIVATING
+
+  TP53_MUT:
+    concept: DRIVER_TP53

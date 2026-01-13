@@ -1,0 +1,72 @@
+trial_id: NCT05920356
+title: CodeBreaK 202 (Sotorasib + Platinum vs Pembrolizumab + Platinum)
+
+policy:
+  inclusion_missing: unknown
+  exclusion_missing: pass
+
+inclusion:
+  - id: INC_NSCLC
+    text: Non-small cell lung cancer
+    field: histology
+    condition: ontology_is_a
+    value: NSCLC
+
+  - id: INC_STAGE
+    text: Stage IV or advanced Stage IIIB/IIIC disease
+    or:
+      - field: current_stage
+        condition: equals
+        value: "IV"
+      - field: current_stage
+        condition: equals
+        value: "III"
+
+  - id: INC_KRAS_G12C
+    text: KRAS G12C mutation
+    field: biomarkers
+    condition: contains
+    value: KRAS_G12C
+
+  - id: INC_PD_L1_NEGATIVE
+    text: PD-L1 negative disease
+    field: pd_l1_tps
+    condition: ontology_is_a
+    value: PDL1_negative
+
+  - id: INC_FIRST_LINE
+    text: No prior systemic therapy in metastatic/non-curable setting
+    field: line_of_therapy
+    condition: equals
+    value: "1L"
+
+  - id: INC_ECOG
+    text: ECOG performance status ≤1
+    field: ecog_ps
+    condition: lte
+    value: 1
+
+exclusion:
+  - id: EXC_SQUAMOUS
+    text: Predominant squamous histology or small-cell component
+    field: histology
+    condition: equals
+    value: squamous
+
+  - id: EXC_OTHER_DRIVER
+    text: Other oncogenic driver with approved targeted therapy
+    field: biomarkers
+    condition: contains_other_than
+    value: DRIVER_KRAS_G12C
+
+  - id: EXC_SYMPTOMATIC_CNS
+    text: Symptomatic brain metastases
+    field: brain_metastasis_status
+    condition: equals
+    value: active_symptomatic
+
+  - id: EXC_PRIOR_KRAS
+    text: Prior KRAS G12C inhibitor therapy
+    field: prior_systemic_therapies
+    condition: contains_any
+    value: ["sotorasib", "adagrasib"]

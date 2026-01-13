@@ -1,0 +1,50 @@
+trial_id: NCT06452277
+title: BAY 2927088 – HER2-activating NSCLC (First-line)
+
+policy:
+  inclusion_missing: unknown
+  exclusion_missing: pass
+
+inclusion:
+  - id: INC_AGE
+    text: Age ≥18 years
+    field: age
+    condition: gte
+    value: 18
+
+  - id: INC_NSCLC
+    text: Non-squamous non-small cell lung cancer
+    field: histology
+    condition: ontology_is_a
+    value: NSCLC
+
+  - id: INC_STAGE
+    text: Stage III–IV disease
+    or:
+      - field: current_stage
+        condition: ontology_is_a
+        value: Stage_III
+      - field: current_stage
+        condition: ontology_is_a
+        value: Stage_IV
+
+
+
+  - id: INC_HER2_ACT
+    text: Activating HER2 mutation in the tyrosine kinase domain
+    field: biomarkers
+    condition: contains
+    value: DRIVER_HER2_ACTIVATING
+
+  - id: INC_FIRST_LINE
+    text: No prior systemic therapy for advanced/metastatic disease
+    field: line_of_therapy
+    condition: equals
+    value: "1L"
+
+exclusion:
+  - id: EXC_OTHER_DRIVER
+    text: Tumors with targetable alterations with approved therapy (except HER2 TKD)
+    field: biomarkers
+    condition: contains_other_than
+    value: DRIVER_HER2_ACTIVATING

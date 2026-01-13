@@ -110,6 +110,12 @@ def process():
             return jsonify({'error': 'Extracted text is empty.'}), 400
 
         logger.info("🤖 Calling LLM for feature extraction...")
+        import time
+
+        t0 = time.perf_counter()
+        llm_text = extract_features_with_llm(text)
+        feature_extraction_ms = (time.perf_counter() - t0) * 1000
+
         llm_text = extract_features_with_llm(text)
 
         if not isinstance(llm_text, dict) or not llm_text:
@@ -121,15 +127,29 @@ def process():
         logger.info("🧠 Running neuro-symbolic eligibility engine...")
         logger.debug(f"🔍 DEBUG: Calling match_trials_llm with features: {json.dumps(llm_text, indent=2)}")
         
-        matched_trials = evaluate_patient_against_trials(llm_text)
+        out = evaluate_patient_against_trials(llm_text)
+        matched_trials = out["results"]
         logger.info(f"✅ Matched Trials: {len(matched_trials)} trials found.")
+
+        timings = out["timings"]
+
+        trial_matching_ms = timings.get("trial_loop", {}).get("mean_ms", None)
+        total_screening_ms = (feature_extraction_ms + (trial_matching_ms or 0))
+        logger.info(f"⏱ Screening timings: {json.dumps(timings, indent=2)}")
+
         
         return jsonify({
-            'features': llm_text,
-            'text': text,
-            'pdf_filename': pdf_filename,
-            'matched_trials': matched_trials
-        })
+        "features": llm_text,
+        "text": text,
+        "pdf_filename": pdf_filename,
+        "matched_trials": matched_trials,
+        "timings": timings,
+        "screening_time": {
+        "feature_extraction_ms": round(feature_extraction_ms, 2),
+        "trial_matching_ms": trial_matching_ms,
+        "total_ms": round(total_screening_ms, 2)
+    }
+})
 
     except Exception as e:
         logger.exception("❌ Unhandled exception in /process")
@@ -138,8 +158,8 @@ def process():
 @bp.route("/match_trials", methods=["POST"])
 def match_trials():
     patient_features = request.json
-    results = evaluate_patient_against_trials(patient_features)
-    return jsonify(results)
+    out = evaluate_patient_against_trials(patient_features)
+    return jsonify(out)
 
 @bp.route('/api/trials', methods=['GET'])
 def get_trials():

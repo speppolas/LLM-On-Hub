@@ -6,7 +6,16 @@ policy:
   inclusion_missing: unknown
   exclusion_missing: pass
 
+# =====================
+# INCLUSION CRITERIA
+# =====================
 inclusion:
+  - id: INC_AGE
+    text: Age ≥18 years
+    field: age
+    condition: gte
+    value: 18
+
   - id: INC_HISTOLOGY
     text: Advanced non-squamous NSCLC
     field: histology
@@ -19,23 +28,28 @@ inclusion:
     condition: equals
     value: "IV"
 
-  - id: INC_EGFR_MUT
+  - id: INC_EGFR_SENSITIZING
     text: Sensitizing EGFR mutation
-    field: biomarkers
-    condition: contains_any
-    value: ["EGFR_exon19_del", "EGFR_L858R", "EGFR_T790M"]
+    field: patient_facts
+    condition: contains
+    value: DRIVER_EGFR_SENSITIZING
+
 
   - id: INC_MET
     text: MET amplification or overexpression
-    field: biomarkers
-    condition: contains_any
-    value: ["MET_amplification", "MET_exon14"]
-
-  - id: INC_PRIOR_OSIMERTINIB
-    text: Prior treatment with osimertinib
-    field: prior_systemic_therapies
+    field: patient_facts
     condition: contains
-    value: osimertinib
+    value: DRIVER_MET
+
+  - id: INC_OSIMERTINIB_EXPOSURE
+    text: Progression on first- or second-line treatment with osimertinib
+    or:
+      - field: prior_systemic_therapies
+        condition: contains
+        value: osimertinib
+      - field: concomitant_treatments
+        condition: contains
+        value: osimertinib
 
   - id: INC_ECOG
     text: ECOG performance status 0–1
@@ -43,27 +57,79 @@ inclusion:
     condition: lte
     value: 1
 
+# =====================
+# EXCLUSION CRITERIA
+# =====================
 exclusion:
   - id: EXC_SQUAMOUS_OR_SCLC
-    text: Squamous histology or small cell lung cancer
-    field: histology
-    condition: contains_any
-    value: ["squamous", "small_cell"]
+    or:
+      - field: histology
+        condition: equals
+        value: squamous
+      - field: histology
+        condition: equals
+        value: small_cell
+    text: "Squamous histology or small cell lung cancer"
 
-  - id: EXC_PRIOR_MET_INHIBITOR
-    text: Prior MET inhibitor therapy
+
+  - id: EXC_OTHER_3GEN_EGFR_TKI_PRIOR
+    text: Prior treatment with third-generation EGFR-TKI other than osimertinib
     field: prior_systemic_therapies
     condition: contains_any
-    value: ["savolitinib"]
+    value:
+      - rociletinib
+      - lazertinib
+      - almonertinib
+
+  - id: EXC_OTHER_3GEN_EGFR_TKI_CURRENT
+    text: Current treatment with third-generation EGFR-TKI other than osimertinib
+    field: concomitant_treatments
+    condition: contains_any
+    value:
+      - rociletinib
+      - lazertinib
+      - almonertinib
+
+  - id: EXC_MET_INHIBITOR_PRIOR
+    text: Prior treatment with MET inhibitors
+    field: prior_systemic_therapies
+    condition: contains_any
+    value:
+      - savolitinib
+      - tepotinib
+      - capmatinib
+      - crizotinib
+
+  - id: EXC_MET_INHIBITOR_CURRENT
+    text: Current treatment with MET inhibitors
+    field: concomitant_treatments
+    condition: contains_any
+    value:
+      - savolitinib
+      - tepotinib
+      - capmatinib
+      - crizotinib
+
+  - id: EXC_ACTIVE_BRAIN_METS
+    text: Active or symptomatic brain metastases
+    field: brain_metastasis_status
+    condition: equals
+    value: active_symptomatic
 
   - id: EXC_PULMONARY
     text: History of interstitial lung disease or pneumonitis
     field: comorbidities
     condition: contains_any
-    value: ["ILD", "pneumonitis"]
+    value:
+      - ILD
+      - pneumonitis
 
   - id: EXC_VIRAL_INFECTION
-    text: Active HIV, HBV or HCV infection
+    text: Active HIV, HBV, HCV or tuberculosis
     field: comorbidities
     condition: contains_any
-    value: ["HIV", "HBV", "HCV"]
+    value:
+      - HIV
+      - HBV
+      - HCV
+      - tuberculosis
