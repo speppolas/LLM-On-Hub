@@ -37,27 +37,25 @@ inclusion:
     condition: equals
     value: adjuvant
 
-  - id: INC_ADJUVANT_CHEMO_RECEIVED
-    text: Prior adjuvant platinum-based chemotherapy
+  - id: INC_ADJUVANT_PLATINUM_CHEMO
+    text: Received at least one dose of adjuvant platinum-based chemotherapy
     field: prior_systemic_therapies
-    condition: not_equals
-    value: not mentioned
+    condition: contains_any
+    value:
+      - carboplatin
+      - cisplatin
 
-  - id: INC_ECOG
-    text: ECOG performance status 0–1
-    field: ecog_ps
-    condition: lte
-    value: 1
 
 # =====================
 # EXCLUSION CRITERIA
 # =====================
 exclusion:
   - id: EXC_SCLC
-    text: Small cell lung cancer or neuroendocrine carcinoma
+    text: Small cell lung cancer / small cell elements
     field: histology
-    condition: equals
-    value: small_cell
+    condition: ontology_is_a
+    value: SCLC
+
 
   - id: EXC_NEOADJUVANT
     text: Prior neoadjuvant therapy
@@ -81,3 +79,19 @@ exclusion:
       - atezolizumab
       - durvalumab
       - cemiplimab
+
+  - id: EXC_HIV
+    text: HIV infection (if excluded)
+    field: comorbidities
+    condition: contains
+    value: HIV
+
+  - id: EXC_IMMUNODEFICIENCY
+    text: Immunodeficiency / immunosuppression
+    field: comorbidities
+    condition: contains
+    value: immunodeficiency
+
+
+
+
