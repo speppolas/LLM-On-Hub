@@ -1,0 +1,107 @@
+trial_id: NCT05298423
+title: MK-7684A + cCRT vs Durvalumab after cCRT in Unresectable Stage III NSCLC
+
+policy:
+  inclusion_missing: unknown
+  exclusion_missing: pass
+
+# =====================
+# INCLUSION CRITERIA
+# =====================
+inclusion:
+  - id: INC_AGE
+    text: Age ≥18 years
+    field: age
+    condition: gte
+    value: 18
+
+  - id: INC_NSCLC
+    text: Histologically or cytologically confirmed NSCLC
+    field: histology
+    condition: ontology_is_a
+    value: NSCLC
+
+  - id: INC_STAGE_III
+    text: Stage IIIA–IIIC disease
+    or:
+      - field: current_stage
+        condition: ontology_is_a
+        value: Stage_III
+
+  - id: INC_NO_METASTATIC_DISEASE
+    text: No evidence of metastatic disease
+    field: current_stage
+    condition: not_equals
+    value: Stage_IV
+
+  - id: INC_ECOG
+    text: ECOG performance status 0–1
+    field: ecog_ps
+    condition: lte
+    value: 1
+
+# =====================
+# EXCLUSION CRITERIA
+# =====================
+exclusion:
+  - id: EXC_SCLC
+    text: Small cell lung cancer or small cell elements
+    field: histology
+    condition: ontology_is_a
+    value: SCLC
+
+  - id: EXC_PRIOR_THORACIC_RT
+    text: Prior thoracic radiotherapy
+    field: concomitant_treatments
+    condition: contains_any
+    value:
+      - radiotherapy (thoracic)
+      - radiotherapy (mediastinum)
+      - radiotherapy (esophagus)
+      - radiotherapy (breast)
+
+  - id: EXC_MAJOR_SURGERY
+    text: Recent major surgery
+    field: concomitant_treatments
+    condition: contains
+    value: surgery
+
+  - id: EXC_IMMUNODEFICIENCY
+    text: Immunodeficiency or chronic immunosuppressive therapy
+    field: comorbidities
+    condition: contains
+    value: immunodeficiency
+
+  - id: EXC_AUTOIMMUNE_DISEASE
+    text: Active autoimmune disease requiring systemic treatment
+    field: comorbidities
+    condition: contains
+    value: autoimmune disease
+
+  - id: EXC_ILD
+    text: History of pneumonitis or interstitial lung disease
+    field: comorbidities
+    condition: contains_any
+    value:
+      - pneumonitis
+      - interstitial lung disease
+
+  - id: EXC_ACTIVE_INFECTION
+    text: Active infection requiring systemic therapy
+    field: comorbidities
+    condition: contains
+    value: active infection
+
+  - id: EXC_HIV
+    text: Known HIV infection
+    field: comorbidities
+    condition: contains
+    value: HIV
+
+  - id: EXC_HBV_HCV
+    text: Active Hepatitis B or Hepatitis C infection
+    field: comorbidities
+    condition: contains_any
+    value:
+      - Hepatitis B
+      - Hepatitis C
