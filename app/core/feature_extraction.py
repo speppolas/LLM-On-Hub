@@ -110,38 +110,31 @@ SCHEMA JSON (OBBLIGATORIO)
 ========================
 
 {{
-  "age": int | "not mentioned",
-  "gender": "male" | "female" | "not mentioned",
-  "ecog_ps": "0" | "1" | "2" | "not mentioned",
-  "histology": "squamous" | "adenocarcinoma" | "small_cell" | "not mentioned",
-  "current_stage": "II" | "III" | "IV" | "not mentioned",
-  "line_of_therapy": "1L" | "2L" | ">=3L" | "adjuvant" | "neoadjuvant" | "maintenance" | "not mentioned",
-  "pd_l1_tps": "0%" | "<1%" | "1-49%" | ">=50%" | "not mentioned" #cerca PD-L1/TPS
-  "biomarkers": ["KRAS_G12C" | "ALK rearrangement"| "EGFR_exon19_del" | "EGFR_L858R" | "EGFR_T790M" | "EGFR_L861Q" | "EGFR_P772R" | "MET_amplification" | "MET_exon14" | "HER2_exon20" | "ALK" | "ROS1" | "RET" | "NTRK" | "BRAF_V600E" | "STK11" | "TP53" | "DNMT3A" | "KRAS_Q61H" ] | ["not mentioned"],
-  "brain_metastasis": ["true" | "false"],
-  "brain_metastasis_status": "none" | "treated_stable" | "active_symptomatic" | "not mentioned",
-  "prior_systemic_therapies": ["osimertinib",
-  "erlotinib","gefitinib","alectinib",
-  "lorlatinib",
-  "amivantamab",
-  "carboplatin","cisplatin","pemetrexed","etoposide","vinorelbine","gemcitabine", "topotecan",
-  "pembrolizumab", "nivolumab", "atezolizumab", "durvalumab", "cemiplimab",
-  "bevacizumab"
-] | ["not mentioned"],
-  "comorbidities": ["hypertension", "immunodeficiency","inflammatory bowel disease", "autoimmune disease", "active infection", "ILD", "pneumonitis", "COPD", "type 2 diabetes", "myocardial infarction",
-  "transient ischemic attack", "obstructive sleep apnea",
-  "benign prostatic hyperplasia", "dyslipidemia",
-  "asthma", "hypothyroidism", "gastritis", "hepatic steatosis",
-  "nasal polyposis", "extrasystole", "osteoporosis",
-  "rheumatoid arthritis", "vulvar lichen",
-  "previous Hodgkin lymphoma", "previous thyroid cancer",
-  "previous testicular seminoma", "previous breast cancer",
-  "previous colon cancer", "previous melanoma"] | ["not mentioned"],
-  "concomitant_treatments": ["radiotherapy (brain)", "radiotherapy (bone)", "radiotherapy (lung)",
-    "radiotherapy (liver)", "radiotherapy (adjuvant)",
-    "radiotherapy (panencephalic)", "radiotherapy (stereotactic)",
-    "chemoradiotherapy", "surgery", "neurosurgery"] | ["not mentioned"]
+  "age": "int | not mentioned",
 
+  "gender": "male | female | not mentioned",
+
+  "ecog_ps": "0 | 1 | 2 | not mentioned",
+
+  "histology": "squamous | adenocarcinoma | small_cell | not mentioned",
+
+  "current_stage": "II | III | IV | not mentioned",
+
+  "line_of_therapy": "1L | 2L | >=3L | adjuvant | neoadjuvant | maintenance | not mentioned",
+
+  "pd_l1_tps": "0% | <1% | 1-49% | >=50% | not mentioned",
+
+  "biomarkers": ["KRAS_G12C", "KRAS_Q61H", "EGFR_exon19_del", "EGFR_L858R", "EGFR_T790M", "EGFR_L861Q", "EGFR_P772R", "ALK rearrangement", "ALK", "ROS1", "RET", "NTRK", "MET_amplification", "MET_exon14", "HER2_exon20", "BRAF_V600E", "STK11", "TP53", "DNMT3A"] | ["not mentioned"],
+
+  "brain_metastasis": ["true | false"],
+
+  "brain_metastasis_status": "none | treated_stable | active_symptomatic | not mentioned",
+
+  "prior_systemic_therapies": ["osimertinib", "erlotinib", "gefitinib", "alectinib", "lorlatinib", "amivantamab", "carboplatin", "cisplatin", "pemetrexed", "etoposide", "vinorelbine", "gemcitabine", "topotecan", "pembrolizumab", "nivolumab", "atezolizumab", "durvalumab", "cemiplimab", "bevacizumab"] | ["not mentioned"],
+
+  "comorbidities": ["hypertension", "immunodeficiency", "inflammatory bowel disease", "autoimmune disease", "active infection", "ILD", "pneumonitis", "COPD", "type 2 diabetes", "myocardial infarction", "transient ischemic attack", "obstructive sleep apnea", "benign prostatic hyperplasia", "dyslipidemia", "asthma", "hypothyroidism", "gastritis", "hepatic steatosis", "nasal polyposis", "extrasystole", "osteoporosis", "rheumatoid arthritis", "vulvar lichen", "previous Hodgkin lymphoma", "previous thyroid cancer", "previous testicular seminoma", "previous breast cancer", "previous colon cancer", "previous melanoma"] | ["not mentioned"],
+
+  "concomitant_treatments": ["radiotherapy (brain)", "radiotherapy (bone)", "radiotherapy (lung)", "radiotherapy (liver)", "radiotherapy (adjuvant)", "radiotherapy (panencephalic)", "radiotherapy (stereotactic)", "chemoradiotherapy", "RTCT", "surgery", "neurosurgery"] | ["not mentioned"]
 }}
 
 ========================
@@ -194,16 +187,18 @@ PRIOR_SYSTEMIC_THERAPIES
 
 COMORBIDITIES
 - guarda attentamente la sezione "COMORBIDITÀ" nella sottosezione "Oncologiche:". 
-- Includi condizioni non oncologiche e neoplasie pregresse.
-- Normalizza in inglese (es. "lichen vulvare" → "vulvar lichen").
-- Abbreviazioni comuni:
-- IPA → hypertension
-- BPCO → COPD
-- DM II → type 2 diabetes
-- IMA → myocardial infarction
-- TIA → transient ischemic attack
-- OSAS → obstructive sleep apnea
-- IPB → benign prostatic hyperplasia
+COMORBIDITIES (STRICT)
+- Inserisci una comorbidità SOLO se è esplicitamente dichiarata nel testo (diagnosi, anamnesi, comorbidità, terapia cronica specifica).
+- NON inferire mai comorbidità da età, fumo, farmaci generici, sintomi, esami o fattori di rischio.
+  Esempi di inferenza VIETATA:
+  • “fuma” ≠ COPD
+  • “dispnea” ≠ asthma/COPD
+  • “statina” ≠ dyslipidemia (a meno che non sia scritto)
+  • “metformina” ≠ type 2 diabetes (a meno che non sia scritto)
+  • “steroidi” ≠ autoimmune disease/immunodeficiency (a meno che non sia scritto)
+- Se il testo dice solo “negativo per” o “assenza di”, NON inserire la comorbidità.
+- Se non trovi una sezione comorbidità/anamnesi, restituisci ["not mentioned"] (non riempire con ipotesi).
+- Usa SOLO i valori consentiti. Se la condizione è menzionata ma non è nella lista consentita, NON aggiungerla e NON sostituirla con un valore simile.
 
 
 CONCOMITANT_TREATMENTS

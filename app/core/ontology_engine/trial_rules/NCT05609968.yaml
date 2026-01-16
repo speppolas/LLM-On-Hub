@@ -14,32 +14,53 @@ inclusion:
     value: PDL1_HIGH
     text: PD-L1 TPS ≥50%
 
-  - id: EXC_PRIMARY_TARGETABLE_DRIVER
-    field: biomarkers
-    condition: contains_any
-    value:
-      - DRIVER_EGFR_SENSITIZING
-      - DRIVER_ALK
-      - DRIVER_ROS1
-    text: EGFR-, ALK-, or ROS1-directed therapy indicated as primary therapy
+  - id: INC_NO_PRIMARY_TARGETED_THERAPY
+    or:
+      # Caso 1: non siamo in prima linea
+      - field: line_of_therapy
+        condition: not_equals
+        value: 1L
+
+      # Caso 2: il paziente ha già ricevuto terapia sistemica
+      - field: prior_systemic_therapies
+        condition: not_equals
+        value: not mentioned
+
+      # Caso 3: nessuna evidenza di driver EGFR/ALK/ROS1 actionable
+      - field: biomarkers
+        condition: equals
+        value: not mentioned
+
+    text: "EGFR-, ALK-, or ROS1-directed therapy not indicated as primary therapy"
+
 
 
 
 exclusion:
 
-  # ----------------------------
-  # PRIOR SYSTEMIC THERAPY (1L)
-  # ----------------------------
+
+  - id: EXC_SECOND_MALIGNANCY
+    field: comorbidities
+    condition: contains_any
+    value:
+      - previous Hodgkin lymphoma
+      - previous thyroid cancer
+      - previous testicular seminoma
+      - previous breast cancer
+      - previous colon cancer
+      - previous melanoma
+    text: "History of second malignancy (proxy; disease-free interval not available)"
   - id: EXC_PRIOR_SYSTEMIC_THERAPY
     field: prior_systemic_therapies
     condition: not_equals
     value: not mentioned
-    text: Prior systemic chemotherapy or targeted/biological therapy for metastatic NSCLC
-
-
-  # ----------------------------
-  # PRIOR IMMUNOTHERAPY
-  # ----------------------------
+    text: "Prior systemic chemotherapy/targeted/biologic therapy for metastatic NSCLC"
+  - id: EXC_PRIOR_TOPO1_INHIBITOR
+    field: prior_systemic_therapies
+    condition: contains_any
+    value:
+      - topotecan
+    text: "Prior Topoisomerase-1 inhibitor (proxy: topotecan only)"
   - id: EXC_PRIOR_IO
     field: prior_systemic_therapies
     condition: contains_any
@@ -49,74 +70,64 @@ exclusion:
       - atezolizumab
       - durvalumab
       - cemiplimab
-    text: Prior anti–PD-1/PD-L1/PD-L2 or other T-cell checkpoint therapy
-
-
-  # ----------------------------
-  # ACTIVE CNS DISEASE
-  # ----------------------------
-  - id: EXC_ACTIVE_CNS
-    field: brain_metastasis_status
-    condition: ontology_is_a
-    value: Active_CNS_disease
-    text: Active CNS metastases or carcinomatous meningitis
-
-
-  # ----------------------------
-  # AUTOIMMUNE / IMMUNE CONDITIONS
-  # ----------------------------
-  - id: EXC_AUTOIMMUNE
+    text: "Prior anti–PD-1/PD-L1/PD-L2 therapy"
+  - id: EXC_CARDIAC_DISEASE_PROXY
     field: comorbidities
-    condition: contains_any
-    value:
-      - rheumatoid arthritis
-    text: Active autoimmune disease requiring systemic treatment in the past 2 years (proxy)
+    condition: contains
+    value: myocardial infarction
+    text: "Cardiac disease (proxy: history of myocardial infarction)"
 
+
+  - id: EXC_IBD
+    field: comorbidities
+    condition: contains
+    value: inflammatory bowel disease
+    text: "Active chronic inflammatory bowel disease"
 
   - id: EXC_IMMUNODEFICIENCY
     field: comorbidities
     condition: contains
     value: immunodeficiency
-    text: Immunodeficiency or immunosuppressive condition
+    text: "Immunodeficiency (proxy for immunosuppression within 7 days)"
 
+  - id: EXC_ACTIVE_CNS
+    field: brain_metastasis_status
+    condition: ontology_is_a
+    value: Active_CNS_disease
+    text: "Known active CNS metastases and/or carcinomatous meningitis"
 
-  # ----------------------------
-  # IBD (proxy via autoimmune bucket)
-  # ----------------------------
-  - id: EXC_INFLAMMATORY_BOWEL_DISEASE
+  - id: EXC_AUTOIMMUNE
     field: comorbidities
-    condition: contains
-    value: inflammatory bowel disease
-    text: Active chronic inflammatory bowel disease (if explicitly reported)
+    condition: contains_any
+    value:
+      - autoimmune disease
+      - rheumatoid arthritis
+      - vulvar lichen
+    text: "Active autoimmune disease requiring systemic treatment in past 2 years (proxy)"
 
-
-  # ----------------------------
-  # PNEUMONITIS / ILD
-  # ----------------------------
   - id: EXC_ILD_PNEUMONITIS
     field: comorbidities
     condition: contains_any
     value:
       - ILD
       - pneumonitis
-    text: History of pneumonitis or interstitial lung disease requiring steroids
+    text: "History of pneumonitis/ILD requiring steroids or current pneumonitis/ILD"
 
-
-  # ----------------------------
-  # ACTIVE INFECTION
-  # ----------------------------
   - id: EXC_ACTIVE_INFECTION
     field: comorbidities
     condition: contains
     value: active infection
-    text: Active infection requiring systemic therapy
-
-
-  # ----------------------------
-  # CARDIAC DISEASE (VERY CONSERVATIVE PROXY)
-  # ----------------------------
-  - id: EXC_CARDIAC_DISEASE
+    text: "Active infection requiring systemic therapy"
+  - id: EXC_HIV
     field: comorbidities
     condition: contains
-    value: myocardial infarction
-    text: Significant cardiac disease 
+    value: HIV
+    text: "History of human immunodeficiency virus (HIV) infection"
+  - id: EXC_HEPATITIS_B_OR_C
+    field: comorbidities
+    condition: contains_any
+    value:
+      - hepatitis B
+      - hepatitis C
+    text: "History of hepatitis B or hepatitis C infection (proxy for HBV history / active HCV)"
+

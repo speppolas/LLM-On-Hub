@@ -18,6 +18,8 @@ pd_l1_tps:
     concept: PDL1_LOW
   ">=50%":
     concept: PDL1_HIGH
+  ">50%":
+    concept: PDL1_HIGH
   ">70%":
     concept: PDL1_HIGH
   ">90%":

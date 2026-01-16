@@ -1,25 +1,24 @@
 trial_id: NCT06305754
-title: MK-2870 vs Platinum – Post-EGFR Advanced NSCLC
+title: "MK-2870 vs Platinum – Post-EGFR Advanced NSCLC"
 
 inclusion:
-
-  - id: INC_NSCLC
-    field: histology
-    condition: ontology_is_a
-    value: NSCLC
-    text: Histologically confirmed non-small cell lung cancer
-
-  - id: INC_ADVANCED_STAGE
-    field: current_stage
-    condition: ontology_is_a
-    value: Stage_IV
-    text: Advanced or metastatic disease
+  - id: INC_STAGE_III_IV
+    or:
+      - field: current_stage
+        condition: equals
+        value: III
+      - field: current_stage
+        condition: equals
+        value: IV
+    text: "Advanced-stage NSCLC (Stage III–IV)"
 
   - id: INC_EGFR_MUT
     field: biomarkers
-    condition: contains
-    value: DRIVER_EGFR_SENSITIZING
-    text: EGFR-mutated NSCLC
+    condition: contains_any
+    value:
+      - DRIVER_EGFR_SENSITIZING
+      - DRIVER_EGFR_RESISTANCE
+    text: "EGFR-mutated NSCLC"
 
   - id: INC_POST_EGFR_TKI
     field: prior_systemic_therapies
@@ -28,49 +27,39 @@ inclusion:
       - osimertinib
       - erlotinib
       - gefitinib
-      - afatinib
-    text: Progression after prior EGFR tyrosine kinase inhibitor
-
+    text: "Prior EGFR tyrosine kinase inhibitor exposure (post-EGFR TKI setting)"
 
 exclusion:
-
   - id: EXC_SQUAMOUS
     field: histology
     condition: equals
     value: squamous
-    text: Predominantly squamous histology NSCLC
+    text: "Predominantly squamous histology NSCLC"
+
+  - id: EXC_CARDIO_CEREBROVASCULAR_PROXY
+    field: comorbidities
+    condition: contains_any
+    value:
+      - myocardial infarction
+      - transient ischemic attack
+    text: "Significant cardiovascular or cerebrovascular disease (proxy)"
 
   - id: EXC_ACTIVE_CNS
     field: brain_metastasis_status
     condition: ontology_is_a
     value: Active_CNS_disease
-    text: Active CNS metastases or carcinomatous meningitis
-
-  - id: EXC_PNEUMONITIS_ILD
-    field: comorbidities
-    condition: contains_any
-    value:
-      - interstitial lung disease
-      - pneumonitis
-    text: History of ILD or pneumonitis requiring steroids
-
-  - id: EXC_IBD
-    field: comorbidities
-    condition: contains_any
-    value:
-      - inflammatory bowel disease
-      - crohn disease
-      - ulcerative colitis
-    text: Active or prior inflammatory bowel disease
+    text: "Known active CNS metastases or carcinomatous meningitis"
 
   - id: EXC_ACTIVE_INFECTION
     field: comorbidities
     condition: contains
     value: active infection
-    text: Active infection requiring systemic therapy
+    text: "Active infection requiring systemic therapy"
 
-  - id: EXC_ORGAN_TRANSPLANT
+  - id: EXC_PNEUMONITIS_ILD
     field: comorbidities
-    condition: contains
-    value: solid organ transplant
-    text: History of allogeneic tissue or solid organ transplant
+    condition: contains_any
+    value:
+      - ILD
+      - pneumonitis
+    text: "History of pneumonitis or interstitial lung disease requiring steroids or current ILD"
