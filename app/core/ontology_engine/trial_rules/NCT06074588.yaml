@@ -1,0 +1,112 @@
+trial_id: NCT06074588
+title: MK-2870 vs Chemotherapy in Previously Treated EGFR-mutant Advanced NSCLC
+phase: PHASE3
+
+# =====================
+# INCLUSION CRITERIA
+# =====================
+inclusion:
+
+  - id: INC_NSCLC_NON_SQUAMOUS
+    text: Advanced or metastatic non-squamous NSCLC
+    field: histology
+    condition: ontology_is_a
+    value: NSCLC_NON_SQUAMOUS
+
+  - id: INC_ADVANCED_STAGE
+    text: Advanced (unresectable Stage III) or metastatic disease
+    or:
+      - field: current_stage
+        condition: ontology_is_a
+        value: Stage_III
+      - field: current_stage
+        condition: ontology_is_a
+        value: Stage_IV
+
+
+  - id: INC_EGFR_MUTATION
+    text: EGFR mutation or other genomic alteration
+    field: biomarkers
+    condition: contains_any
+    value:
+      - DRIVER_EGFR_SENSITIZING
+      - EGFR_T790M
+
+  - id: INC_PRIOR_EGFR_TKI
+    text: Prior EGFR TKI therapy (1–2 lines)
+    field: prior_systemic_therapies
+    condition: contains_any
+    value:
+      - osimertinib
+      - erlotinib
+      - gefitinib
+
+  - id: INC_PRIOR_PLATINUM
+    text: Prior platinum-based chemotherapy
+    field: prior_systemic_therapies
+    condition: contains_any
+    value:
+      - carboplatin
+      - cisplatin
+
+  - id: INC_ECOG_0_1
+    text: ECOG performance status 0–1
+    field: ecog_ps
+    condition: ontology_is_a
+    value: ECOG_0_1
+
+
+# =====================
+# EXCLUSION CRITERIA
+# =====================
+exclusion:
+
+  - id: EXC_SMALL_CELL_ELEMENTS
+    text: Mixed tumor with small cell elements
+    field: histology
+    condition: equals
+    value: squamous
+
+  - id: EXC_EGFR_T790M_NO_3GEN_TKI
+    text: EGFR T790M mutation without prior third-generation EGFR TKI
+    and:
+      - field: biomarkers
+        condition: contains
+        value: EGFR_T790M
+  
+      - field: prior_systemic_therapies
+        condition: not_equals
+        value: osimertinib
+
+
+  - id: EXC_RECENT_SYSTEMIC_TX
+    text: Recent systemic anticancer therapy (<4 weeks)
+    field: prior_systemic_therapies
+    condition: not_equals
+    value: not mentioned
+
+  - id: EXC_ACTIVE_INFECTION
+    text: Active infection requiring systemic therapy
+    field: comorbidities
+    condition: contains
+    value: active infection
+
+  - id: EXC_PNEUMONITIS
+    text: History of pneumonitis or interstitial lung disease
+    field: comorbidities
+    condition: contains
+    value: pneumonitis
+
+  - id: EXC_CNS_METASTASES
+    text: Active CNS metastases
+    field: brain_metastasis_status
+    condition: ontology_is_a
+    value: Active_CNS_disease
+
+  - id: EXC_HIV_KS
+    text: HIV with Kaposi sarcoma or Castleman disease
+    field: comorbidities
+    condition: contains_any
+    value:
+      - kaposi sarcoma
+      - castleman disease
