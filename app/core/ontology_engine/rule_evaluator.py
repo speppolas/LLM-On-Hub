@@ -47,6 +47,33 @@ def evaluate_rule(rule: Dict[str, Any], patient: Dict[str, Any], derived_facts: 
             return "not_met"
         return "unknown"
 
+
+    # ==========================
+    # AND LOGIC (NEW)
+    # ==========================
+    if "and" in rule:
+        subrules = rule.get("and")
+        if not isinstance(subrules, list) or len(subrules) == 0:
+            return "unknown"
+
+        for subrule in subrules:
+            if not isinstance(subrule, dict):
+                return "unknown"
+            if "or" in subrule or "and" in subrule:
+                raise ValueError("Nested AND/OR not supported")
+
+            if "field" not in subrule or "condition" not in subrule or "value" not in subrule:
+                return "unknown"
+
+        results = [evaluate_rule(sr, patient, derived_facts) for sr in subrules]
+
+        if all(r == "met" for r in results):
+            return "met"
+        if any(r == "not_met" for r in results):
+            return "not_met"
+        return "unknown"
+
+
     # ==========================
     # STANDARD RULES
     # ==========================
@@ -148,3 +175,4 @@ def evaluate_rule(rule: Dict[str, Any], patient: Dict[str, Any], derived_facts: 
         return "met" if val == target else "not_met"
 
     return "unknown"
+
