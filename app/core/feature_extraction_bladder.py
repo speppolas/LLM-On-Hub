@@ -1,0 +1,467 @@
+import os
+import time
+import re
+import json
+import logging
+import pdfplumber
+from typing import Dict, Any, Union, List
+from datetime import datetime, timedelta
+from flask import current_app
+from app.core.llm_processor import get_llm_processor
+from app.core.schema_validation import ClinicalFeatures, ValidationError
+from app.utils import get_all_trials
+
+
+
+from app import logger
+
+# Ensure the logs folder exists
+os.makedirs("logs", exist_ok=True)
+ 
+def extract_text_from_pdf(pdf_file: Union[str, bytes]) -> str:
+    try:
+        text = ""
+        with pdfplumber.open(pdf_file) as pdf:
+            for page in pdf.pages:
+                text += (page.extract_text() or "")
+        return text.strip()
+    except Exception as e:
+        logger.error(f"Error extracting text from PDF: {str(e)}")
+        raise Exception(f"Unable to extract text from PDF: {str(e)}")
+def normalize_llm_features(features: dict) -> dict:
+    LIST_FIELDS = [
+        "biomarkers",
+        "prior_systemic_therapies",
+        "comorbidities",
+        "concomitant_treatments",
+        "brain_metastasis"
+    ]
+
+    for field in LIST_FIELDS:
+        if field in features:
+            value = features[field]
+
+            # Empty list → epistemic unknown
+            if isinstance(value, list) and len(value) == 0:
+                features[field] = ["not mentioned"]
+
+    return features
+
+
+
+def normalize_prior_vs_concomitant(patient: dict) -> dict:
+    prior = set(patient.get("prior_systemic_therapies", []))
+    concomitant = set(patient.get("concomitant_treatments", []))
+
+    # Se un farmaco è concomitante, NON può essere prior
+    cleaned_prior = [
+        x for x in prior
+        if x not in concomitant and x != "not mentioned"
+    ]
+
+    if not cleaned_prior:
+        patient["prior_systemic_therapies"] = ["not mentioned"]
+    else:
+        patient["prior_systemic_therapies"] = cleaned_prior
+
+    return patient
+def extract_first_json_object(text: str) -> dict:
+    """
+    Extracts the first valid JSON object from a string.
+    Robust to markdown, explanations, code fences.
+    """
+    import json
+
+    start = text.find("{")
+    if start == -1:
+        raise ValueError("No JSON object start found")
+
+    depth = 0
+    for i in range(start, len(text)):
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                candidate = text[start:i+1]
+                return json.loads(candidate)
+
+    raise ValueError("No complete JSON object found")
+
+def extract_features_with_llm(text: str) -> Dict[str, Any]:
+    from app.core.llm_processor import get_llm_processor
+    llm = get_llm_processor()
+    prompt = f"""
+You are a clinical information extraction system.
+
+Your task is to extract a predefined and limited set of clinical features from the provided patient text.
+You MUST extract ONLY the features listed below.
+Do NOT infer, assume, normalize, or hallucinate any information.
+
+If a feature is not explicitly mentioned in the text, return the value "not mentioned".
+
+Use ONLY the allowed values for each field.
+Return the output as a single valid JSON object and nothing else.
+
+=====================
+FEATURES TO EXTRACT
+=====================
+
+1. Age
+2. Gender
+3. Diagnosis
+4. Histologic Variant
+5. Stage
+6. Brain Metastasis
+7. ECOG Performance Status
+8. Line of Therapy
+9. Response to First Line Treatment
+10. Concomitant Treatments
+11. Comorbidities
+
+=====================
+OUTPUT FORMAT
+=====================
+
+{
+  "age": "",
+  "gender": "",
+  "diagnosis": "",
+  "histologic_variant": "",
+  "stage": "",
+  "brain_metastasis": "",
+  "ecog_ps": "",
+  "line_of_therapy": "",
+  "response_first_line": "",
+  "concomitant_treatments": [],
+  "comorbidities": []
+}
+
+=====================
+ALLOWED VALUES
+=====================
+
+Age:
+- integer number (years)
+- "not mentioned"
+
+Gender:
+- "male"
+- "female"
+- "other"
+- "not mentioned"
+
+Diagnosis:
+- "NSCLC"
+- "SCLC"
+- "urothelial carcinoma"
+- "other"
+- "not mentioned"
+
+Histologic Variant:
+- "adenocarcinoma"
+- "squamous"
+- "nonsquamous"
+- "small_cell"
+- "urothelial"
+- "not mentioned"
+
+Stage:
+- "Stage I"
+- "Stage II"
+- "Stage III"
+- "Stage IV"
+- "limited"
+- "extensive"
+- "not mentioned"
+
+Brain Metastasis:
+- "none"
+- "present"
+- "active_symptomatic"
+- "treated_stable"
+- "not mentioned"
+
+ECOG Performance Status:
+- "0"
+- "1"
+- "2"
+- "3"
+- "4"
+- "not mentioned"
+
+Line of Therapy:
+- "1L"
+- "2L"
+- "3L_or_more"
+- "adjuvant"
+- "neoadjuvant"
+- "maintenance"
+- "not mentioned"
+
+Response to First Line Treatment:
+- "CR"
+- "PR"
+- "SD"
+- "PD"
+- "not evaluable"
+- "not mentioned"
+
+Concomitant Treatments (list):
+- "chemotherapy"
+- "immunotherapy"
+- "targeted therapy"
+- "radiotherapy"
+- "surgery"
+- "steroids"
+- "antibiotics"
+- "not mentioned"
+
+Comorbidities (list):
+- "hypertension"
+- "diabetes"
+- "cardiovascular disease"
+- "autoimmune disease"
+- "inflammatory bowel disease"
+- "interstitial lung disease"
+- "HIV"
+- "hepatitis B"
+- "hepatitis C"
+- "other malignancy"
+- "active infection"
+- "not mentioned"
+
+=====================
+STRICT RULES
+=====================
+
+- Do NOT infer stage from treatments.
+- Do NOT infer line of therapy from drug names.
+- Do NOT infer response unless explicitly stated.
+- Do NOT add biomarkers, laboratory values, timing, toxicity grades, or molecular data.
+- Use "not mentioned" whenever information is missing, unclear, or ambiguous.
+
+The goal is conservative, safe extraction for downstream ontology-based eligibility reasoning.
+"""
+
+
+
+
+
+
+
+
+
+    logger.info(f"Prompt sent to LLM:\n{prompt[:2000]}")  # Log the prompt snippet
+    
+    try:
+        # Send prompt to LLM and receive response
+        response = llm.generate_response(prompt)
+        logger.info(f"🧠 LLM Raw Response: {response[:1000]}")
+
+        try:
+            os.makedirs("logs", exist_ok=True)
+            filename = f"logs/llm_raw_debug_{int(time.time())}.json"
+            with open(filename, "w") as f:
+                json.dump({"prompt": prompt, "response": response}, f, indent=2)
+            logger.info(f"💾 Saved LLM debug output to {filename}")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to write raw debug log: {e}")
+        
+        
+        # Parse the LLM response to get 'llm_text'
+        resp_json = json.loads(response)      
+        llm_text_str = resp_json['response']
+        llm_text = extract_first_json_object(llm_text_str)
+        llm_text = normalize_llm_features(llm_text)
+        llm_text = normalize_prior_vs_concomitant(llm_text)
+
+        
+        if not isinstance(llm_text, dict):
+            logger.error(f"❌ LLM response is not a valid JSON object: {llm_text}")
+            return {}
+
+        logger.info(f"✅ Extracted Features (llm_text): {json.dumps(llm_text, indent=2)}")
+        return llm_text
+
+    except json.JSONDecodeError as e:
+        logger.error(f"❌ JSON decoding error: {str(e)} - Raw response: {response}")
+        return {}
+    except Exception as e:
+        logger.error(f"❌ Unexpected error in feature extraction: {e}")
+        return {}
+
+
+def highlight_sources(text: str, features: Dict[str, Any]) -> str:
+    for key, value in features.items():
+        if key.endswith('_source_text') and isinstance(value, str) and value.strip():
+            try:
+                escaped = re.escape(value.strip())
+                text = re.sub(f"({escaped})", r'<mark>\1</mark>', text, flags=re.IGNORECASE)
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to highlight '{value}': {e}")
+    return text
+
+
+import json
+import time
+import re
+from typing import Dict, Any, List
+
+def parse_llm_response(raw_response: str) -> list:
+    """
+    Estrae e parsifica il JSON dei trial dalla chiave 'response' all'interno di raw_response.
+    """
+    try:
+        # Decodifica il JSON dalla stringa di raw_response
+        response_data = json.loads(raw_response)
+        
+        # Verifica se esiste la chiave 'response' e la estrae
+        llm_text_response = response_data.get("response", "")
+        if not llm_text_response:
+            raise ValueError("❌ Nessuna risposta trovata nella chiave 'response'.")
+
+        # Cerca il blocco JSON nella risposta usando regex
+        json_match = re.search(r"```json\s*(\[.*?\])\s*```", llm_text_response, re.DOTALL)
+        if not json_match:
+            json_match = re.search(r"```(.*?)```", llm_text_response, re.DOTALL)
+
+        if json_match:
+            json_text = json_match.group(1).strip()
+            parsed_json = json.loads(json_text)
+            return parsed_json if isinstance(parsed_json, list) else []
+
+        else:
+            raise ValueError("❌ Nessun blocco JSON trovato nella risposta LLM.")
+
+    except (json.JSONDecodeError, ValueError) as e:
+        logger.error(f"❌ Errore durante il parsing della risposta LLM: {str(e)}")
+        return []
+
+def match_trials_llm(llm_text: Dict[str, Any]) -> List[Dict[str, Any]]:
+    logger.info("✅ Starting LLM Trial Matching (Batched)...")
+    print("✅ Starting LLM Trial Matching (Batched)...")  # Immediate feedback
+
+    llm = get_llm_processor()
+    trials = get_all_trials()
+    logger.info(f"✅ Trials loaded: {len(trials)}")
+    print(f"✅ Trials loaded: {len(trials)}")
+
+    if not trials:
+        logger.error("❌ No trials found in database")
+        print("❌ No trials found in database")
+        return []
+
+    matched_trials = []
+    logger.info("🔍 Matching Trials using LLM with Batching (4 Trials per Batch)...")
+    print("🔍 Matching Trials using LLM with Batching (4 Trials per Batch)...")
+
+    batch_size = 3
+    trial_batches = [trials[i:i + batch_size] for i in range(0, len(trials), batch_size)]
+    debug_filename = f"logs/llm_match_debug_{int(time.time())}.json"
+    debug_data = {"llm_text": llm_text, "batch_responses": []}
+    logger.info(f"✅ Debug file initialized: {debug_filename}")
+
+    for batch_index, batch in enumerate(trial_batches):
+        logger.info(f"🔹 Processing batch {batch_index + 1} of {len(trial_batches)}...")
+
+        prompt = f"""
+You are a clinical AI assistant. Is the following patient eligible for this trials? 
+
+PATIENT FEATURES:
+{json.dumps(llm_text, indent=2)}
+
+### TRIALS:
+{json.dumps([trial for trial in batch], indent=2)}
+
+Explain me why you decided the eligibility or not through a JSON list where each object is in the following strict format :
+[
+  {{
+    "trial_id": string,
+    "title": string,
+    "description": string,
+    "match_score": integer (0 to 100),
+    "overall_recommendation": string,
+    "criteria_analysis": string,
+    "summary": string
+  }}
+]
+"""
+        try:
+            response = llm.generate_response(prompt)
+            logger.info(f"🔧 LLM Raw Response (Batch {batch_index + 1}): {response[:1000]}")
+
+            if not response:
+                logger.error(f"❌ Empty response from LLM for Batch {batch_index + 1}")
+                debug_data["batch_responses"].append({
+                    "batch_index": batch_index + 1,
+                    "response": "EMPTY RESPONSE"
+                })
+                continue
+
+            # Save the raw response in debug data
+            debug_data["batch_responses"].append({
+                "batch_index": batch_index + 1,
+                "raw_response": response
+            })
+
+            # ✅ Parsing the JSON response using the robust function
+            match_results = parse_llm_response(response)
+
+            if isinstance(match_results, list):
+                for trial, match_result in zip(batch, match_results):
+                    matched_trials.append({
+                        "trial_id": trial.get("id"),
+                        "title": trial.get("title", "Unknown Trial"),
+                        "description": trial.get("description", "No description provided."),
+                        "match_score": match_result.get("match_score", 0),
+                        "recommendation": match_result.get("overall_recommendation", "UNKNOWN"),
+                        "criteria_analysis": match_result.get("criteria_analysis"),
+                        "summary": match_result.get("summary", "No summary available.")
+                    })
+            else:
+                logger.error(f"❌ Invalid JSON structure for Batch {batch_index + 1}")
+
+        except Exception as e:
+            logger.error(f"❌ Error in LLM matching for batch {batch_index + 1}: {str(e)}")
+            debug_data["batch_responses"].append({
+                "batch_index": batch_index + 1,
+                "error": str(e)
+            })
+
+    # Save the full debug data to the debug file
+    with open(debug_filename, "w") as f:
+        json.dump(debug_data, f, indent=2)
+    logger.info(f"💾 Saved LLM trial matching debug output to {debug_filename}")
+    print(f"💾 Saved LLM trial matching debug output to {debug_filename}")
+
+    # ✅ Sort matched trials by Match Score (High to Low)
+    matched_trials.sort(key=lambda x: x.get('match_score', 0), reverse=True)
+    logger.info(f"✅ Trial matching completed. {len(matched_trials)} trials matched.")
+
+    # Save matched trials for further review
+    matched_trials_filename = f"logs/matched_trials_{int(time.time())}.json"
+    with open(matched_trials_filename, "w") as f:
+        json.dump(matched_trials, f, indent=2)
+    logger.info(f"💾 Matched trials saved to {matched_trials_filename}")
+
+    return matched_trials
+
+
+
+def clean_expired_files(upload_folder: str = 'uploads', max_age_minutes: int = 30) -> None:
+    try:
+        expiration_time = datetime.now() - timedelta(minutes=max_age_minutes)
+        if not os.path.exists(upload_folder):
+            logger.warning(f"⚠️ Upload folder does not exist: {upload_folder}")
+            return
+
+        for filename in os.listdir(upload_folder):
+            file_path = os.path.join(upload_folder, filename)
+            if os.path.isfile(file_path) and filename.endswith('.pdf'):
+                file_creation_time = datetime.fromtimestamp(os.path.getctime(file_path))
+                if file_creation_time < expiration_time:
+                    os.remove(file_path)
+                    logger.info(f"🗑️ Removed expired file: {filename}")
+    except Exception as e:
+        logger.error(f"❌ Error cleaning expired files: {str(e)}")
