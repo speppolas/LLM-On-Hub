@@ -1,0 +1,121 @@
+trial_id: NCT06170788
+title: TroFuse-007 (MK-2870 + Pembrolizumab vs Pembrolizumab)
+
+policy:
+  inclusion_missing: unknown
+  exclusion_missing: pass
+
+# =====================
+# INCLUSION CRITERIA
+# =====================
+inclusion:
+  - id: INC_AGE
+    text: Age ≥18 years
+    field: age
+    condition: gte
+    value: 18
+
+  - id: INC_NSCLC
+    text: Histologically or cytologically confirmed NSCLC
+    field: histology
+    condition: ontology_is_a
+    value: NSCLC
+
+  - id: INC_PDL1_HIGH
+    text: PD-L1 TPS ≥50%
+    field: pd_l1_tps
+    condition: ontology_is_a
+    value: PDL1_HIGH
+
+  - id: INC_ECOG
+    text: ECOG performance status 0–1
+    field: ecog_ps
+    condition: lte
+    value: 1
+
+# =====================
+# EXCLUSION CRITERIA
+# =====================
+exclusion:
+  - id: EXC_SCLC
+    text: Small cell lung cancer or small cell elements
+    field: histology
+    condition: ontology_is_a
+    value: SCLC
+
+  - id: EXC_PRIMARY_TARGETED_THERAPY_INDICATED
+    text: EGFR-, ALK-, or ROS1-directed therapy indicated as primary therapy
+    field: biomarkers
+    condition: contains_any
+    value:
+      - DRIVER_EGFR_SENSITIZING
+      - DRIVER_ALK
+      - ROS1
+
+  - id: EXC_PRIOR_METASTATIC_SYSTEMIC_THERAPY
+    text: Prior systemic anticancer therapy for metastatic NSCLC
+    field: prior_systemic_therapies
+    condition: not_equals
+    value: not mentioned
+
+  - id: EXC_PRIOR_IMMUNOTHERAPY
+    text: Prior PD-1 / PD-L1 / PD-L2 therapy
+    field: prior_systemic_therapies
+    condition: contains_any
+    value:
+      - pembrolizumab
+      - nivolumab
+      - atezolizumab
+      - durvalumab
+      - cemiplimab
+
+  - id: EXC_CNS_METASTASES
+    text: Active CNS metastases or carcinomatous meningitis
+    field: brain_metastasis_status
+    condition: equals
+    value: active_symptomatic
+
+  - id: EXC_SEVERE_OCULAR_DISEASE
+    text: Severe ocular surface disease preventing corneal healing
+    field: comorbidities
+    condition: contains_any
+    value:
+      - severe dry eye syndrome
+      - meibomian gland disease
+      - blepharitis
+      - severe corneal disease
+
+  - id: EXC_IBD
+    text: History of inflammatory bowel disease
+    field: comorbidities
+    condition: contains_any
+    value:
+      - inflammatory bowel disease
+      - Crohn's disease
+      - ulcerative colitis
+      - chronic diarrhea
+
+  - id: EXC_SIGNIFICANT_CV_DISEASE
+    text: Significant cardiovascular or cerebrovascular disease (proxy)
+    field: comorbidities
+    condition: contains_any
+    value:
+      - myocardial infarction
+      - unstable angina
+      - congestive heart failure
+      - arrhythmia
+      - stroke
+      - cerebrovascular disease
+
+  - id: EXC_HIV_WITH_KAPOSI_OR_CASTLEMAN
+    text: HIV infection with Kaposi's sarcoma or Multicentric Castleman's Disease
+    and:
+      - field: comorbidities
+        condition: contains
+        value: HIV
+      - field: comorbidities
+        condition: contains_any
+        value:
+          - Kaposi's sarcoma
+          - Multicentric Castleman's Disease
+
