@@ -1,0 +1,72 @@
+trial_id: NCT02603432
+title: Maintenance Therapy After First-Line Platinum Chemotherapy in Metastatic Urothelial Carcinoma
+
+# =========================
+# INCLUSION CRITERIA
+# =========================
+inclusion:
+
+  # Age ≥ 18
+  - id: INC_AGE_ADULT
+    field: age
+    condition: gte
+    value: 18
+    text: "Age ≥ 18 years"
+
+  # Histology: urothelial carcinoma
+  - id: INC_HISTOLOGY_UROTHELIAL
+    field: histology
+    condition: ontology_is_a
+    value: Urothelial_carcinoma
+    text: "Histologically confirmed transitional cell carcinoma of the urothelium"
+
+  # Stage IV disease
+  - id: INC_STAGE_IV
+    field: current_stage
+    condition: ontology_is_a
+    value: Stage_IV
+    text: "Stage IV disease at the start of first-line chemotherapy"
+
+  # First-line chemotherapy
+  - id: INC_POST_1L_PLATINUM
+    field: prior_systemic_therapies
+    condition: contains_ontology
+    value: Platinum_chemotherapy
+    text: "Prior first-line platinum-based chemotherapy (4–6 cycles per protocol)"
+
+  # No progressive disease after first line (CR / PR / SD)
+  - id: INC_NO_PD_AFTER_1L
+    or:
+    - field: response_first_line
+      condition: contains_any
+      value: [CR, PR, SD]
+    - field: non_progressive_after_1L
+      condition: equals
+      value: true
+    text: "No evidence of progressive disease following completion of first-line chemotherapy"
+# =========================
+# EXCLUSION CRITERIA
+# =========================
+exclusion:
+
+
+  # Prior immunotherapy
+  - id: EXC_PRIOR_IMMUNOTHERAPY
+    field: prior_systemic_therapies
+    condition: contains
+    value: immunotherapy
+    text: "Prior immunotherapy targeting immune checkpoint pathways"
+
+  # Symptomatic CNS metastases requiring steroids
+  - id: EXC_ACTIVE_CNS
+    field: brain_metastasis_status
+    condition: ontology_is_a
+    value: Active_CNS_disease
+    text: "Symptomatic CNS metastases requiring steroids"
+
+  # Other malignancy within 5 years
+  - id: EXC_OTHER_MALIGNANCY
+    field: comorbidities
+    condition: contains
+    value: other malignancy
+    text: "Diagnosis of another malignancy within 5 years"

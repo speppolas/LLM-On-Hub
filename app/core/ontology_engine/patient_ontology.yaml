@@ -1,12 +1,13 @@
 # app/core/ontology_engine/patient_ontology.yaml
 
 ecog_ps:
-  0:
-    concept: ECOG_0
-  1:
-    concept: ECOG_1
-  2:
-    concept: ECOG_2
+    
+    0:
+      concept: ECOG_0
+    1:
+      concept: ECOG_1
+    2:
+      concept: ECOG_2
 
 
 pd_l1_tps:
@@ -101,18 +102,22 @@ biomarkers:
     concept: DRIVER_EGFR_SENSITIZING
   EGFR_T790M:
     concept: DRIVER_EGFR_RESISTANCE
+  EGFR_L861Q:
+    concept: DRIVER_EGFR_SENSITIZING
+  EGFR_L858R:
+    concept: DRIVER_EGFR_SENSITIZING
 
   MET_AMPLIFICATION:
     concept: DRIVER_MET
 
   HER2_EXON20:
-    concept: DRIVER_HER2_ACTIVATING
+      concept: DRIVER_HER2_ACTIVATING
   HER2_MUT:
     concept: DRIVER_HER2_ACTIVATING
   HER2_TKD:
     concept: DRIVER_HER2_ACTIVATING
   HER2_ACTIVATING:
-    concept: DRIVER_HER2_ACTIVATING
+     concept: DRIVER_HER2_ACTIVATING
 
   ERBB2_EXON20:
     concept: DRIVER_HER2_ACTIVATING
@@ -121,3 +126,8 @@ biomarkers:
 
   TP53_MUT:
     concept: DRIVER_TP53
+  TP53:
+    concept: DRIVER_TP53
+
+  
+

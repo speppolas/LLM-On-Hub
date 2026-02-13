@@ -92,7 +92,11 @@ def evaluate_rule(rule: Dict[str, Any], patient: Dict[str, Any], derived_facts: 
     )
 
     # CLOSED-WORLD: prior therapies + comorbidities (come hai impostato tu)
+    if is_missing and field == "comorbidities":
+        return "not_met"
     if is_missing and field == "prior_systemic_therapies":
+        return "not_met"
+    if is_missing and field == "concomitant_treatments":
         return "not_met"
     if is_missing and field == "comorbidities":
         return "not_met"

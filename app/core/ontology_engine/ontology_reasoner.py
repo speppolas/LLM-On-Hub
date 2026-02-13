@@ -72,6 +72,13 @@ def derive_ontology_facts(
         if bm == ["true"] or bm == "true":
             derived["brain_cns_is_a"] = "Active_CNS_disease"
 
+    # Standard-of-care inference:
+    # maintenance after 1L implies non-progressive disease
+    line = patient.get("line_of_therapy")
+    if line == "maintenance":
+        derived["non_progressive_after_1L"] = True
+        
+        
     return derived
 
 

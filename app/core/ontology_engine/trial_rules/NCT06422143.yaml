@@ -9,7 +9,6 @@ policy:
 # INCLUSION CRITERIA
 # =====================
 inclusion:
-
   - id: INC_AGE
     field: age
     condition: gte
@@ -31,6 +30,9 @@ inclusion:
     value: 1
 
 
+# =====================
+# EXCLUSION CRITERIA
+# =====================
 exclusion:
   - id: EXC_SCLC
     text: Small cell lung cancer or small cell elements
@@ -38,49 +40,8 @@ exclusion:
     condition: ontology_is_a
     value: SCLC
 
-- id: EXC_IBD
-  text: Inflammatory bowel disease history (Crohn/UC)
-  field: comorbidities
-  condition: contains_any
-  value:
-    - inflammatory bowel disease
-    - Crohn's disease
-    - ulcerative colitis
-    - chronic diarrhea
-
-- id: EXC_SEVERE_OCULAR_DISEASE
-  text: Severe ocular surface disease (dry eye / meibomian / blepharitis / corneal disease)
-  field: comorbidities
-  condition: contains_any
-  value:
-    - severe dry eye syndrome
-    - meibomian gland disease
-    - blepharitis
-    - severe corneal disease
-- id: EXC_SIGNIFICANT_CV_DISEASE_PROXY
-  text: Significant cardiovascular/cerebrovascular disease (proxy)
-  field: comorbidities
-  condition: contains_any
-  value:
-    - unstable angina
-    - congestive heart failure
-    - arrhythmia
-    - stroke
-    - myocardial infarction
-- id: EXC_HIV_WITH_KAPOSI_OR_CASTLEMAN
-  text: HIV with Kaposi's sarcoma or Multicentric Castleman's Disease
-  and:  # <-- attenzione: il tuo engine NON supporta "and" oggi
-    - field: comorbidities
-      condition: contains
-      value: HIV
-    - field: comorbidities
-      condition: contains_any
-      value:
-        - Kaposi's sarcoma
-        - Multicentric Castleman's Disease
-
   - id: EXC_PRIOR_SYSTEMIC_THERAPY
-    text: Prior systemic chemotherapy/targeted/biologic therapy (proxy: any prior systemic therapy recorded)
+    text: Prior systemic chemotherapy/targeted/biologic therapy (proxy)
     field: prior_systemic_therapies
     condition: not_equals
     value: not mentioned
@@ -103,7 +64,7 @@ exclusion:
     value: none
 
   - id: EXC_RADIOTHERAPY
-    text: Recent radiotherapy (proxy: any radiotherapy captured)
+    text: Recent radiotherapy (proxy)
     field: concomitant_treatments
     condition: contains_any
     value:
@@ -116,17 +77,26 @@ exclusion:
       - radiotherapy (stereotactic)
       - chemoradiotherapy
 
-  - id: EXC_HIV_WITH_KAPOSI_OR_CASTLEMAN
-    text: HIV infection with Kaposi's sarcoma or Multicentric Castleman's Disease
-    and:
-      - field: comorbidities
-        condition: contains
-        value: HIV
-      - field: comorbidities
-        condition: contains_any
-        value:
-          - Kaposi's sarcoma
-          - Multicentric Castleman's Disease
+  - id: EXC_IBD
+    text: History of inflammatory bowel disease
+    field: comorbidities
+    condition: contains_any
+    value:
+      - inflammatory bowel disease
+      - Crohn's disease
+      - ulcerative colitis
+      - chronic diarrhea
+
+  - id: EXC_SEVERE_OCULAR_DISEASE
+    text: Severe ocular surface disease preventing corneal healing
+    field: comorbidities
+    condition: contains_any
+    value:
+      - severe dry eye syndrome
+      - meibomian gland disease
+      - blepharitis
+      - severe corneal disease
+
   - id: EXC_SIGNIFICANT_CV_DISEASE
     text: Significant cardiovascular or cerebrovascular disease (proxy)
     field: comorbidities
@@ -139,25 +109,14 @@ exclusion:
       - stroke
       - cerebrovascular disease
 
-  - id: EXC_SEVERE_OCULAR_DISEASE
-    text: Severe ocular surface disease preventing corneal healing
-    field: comorbidities
-    condition: contains_any
-    value:
-      - severe dry eye syndrome
-      - meibomian gland disease
-      - blepharitis
-      - severe corneal disease
-
-
-  - id: EXC_IBD
-    text: History of inflammatory bowel disease
-    field: comorbidities
-    condition: contains_any
-    value:
-      - inflammatory bowel disease
-      - Crohn's disease
-      - ulcerative colitis
-      - chronic diarrhea
-
-
+  - id: EXC_HIV_WITH_KAPOSI_OR_CASTLEMAN
+    text: HIV infection with Kaposi's sarcoma or Multicentric Castleman's Disease
+    and:
+      - field: comorbidities
+        condition: contains
+        value: HIV
+      - field: comorbidities
+        condition: contains_any
+        value:
+          - Kaposi's sarcoma
+          - Multicentric Castleman's Disease

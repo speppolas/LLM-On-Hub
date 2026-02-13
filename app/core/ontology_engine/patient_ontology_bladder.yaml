@@ -1,0 +1,195 @@
+ecog_ps:
+  "0":
+    concept: ECOG_0
+  "1":
+    concept: ECOG_1
+  "2":
+    concept: ECOG_2
+  "3":
+    concept: ECOG_3
+  "4":
+    concept: ECOG_4
+
+
+# =========================
+# Brain Metastasis
+# =========================
+brain_metastasis:
+  none:
+    concept: No_CNS_disease
+  present:
+    concept: CNS_metastases_unspecified
+  treated_stable:
+    concept: Stable_CNS_disease
+  active_symptomatic:
+    concept: Active_CNS_disease
+
+
+# =========================
+# Histology
+# =========================
+histology:
+  urothelial carcinoma:
+    concept: Urothelial_carcinoma
+
+  squamous:
+    concept: Squamous_carcinoma
+
+  not mentioned:
+    concept: Histology_unknown
+
+
+# =========================
+# Disease Stage
+# =========================
+current_stage:
+  I:
+    concept: Stage_I
+  II:
+    concept: Stage_II
+  III:
+    concept: Stage_III
+  IV:
+    concept: Stage_IV
+  not mentioned:
+    concept: Stage_unknown
+
+
+# =========================
+# Line of Therapy
+# =========================
+line_of_therapy:
+  "1L":
+    concept: First_line
+  "2L":
+    concept: Second_line
+  "3L_or_more":
+    concept: Later_line
+  adjuvant:
+    concept: Adjuvant
+  neoadjuvant:
+    concept: Neoadjuvant
+  maintenance:
+    concept: Maintenance
+  not mentioned:
+    concept: Line_unknown
+
+
+# =========================
+# Concomitant Treatments
+# =========================
+concomitant_treatments:
+  chemotherapy:
+    concept: Concomitant_chemotherapy
+  immunotherapy:
+    concept: Concomitant_immunotherapy
+  targeted therapy:
+    concept: Concomitant_targeted_therapy
+  radiotherapy:
+    concept: Concomitant_radiotherapy
+  surgery:
+    concept: Concomitant_surgery
+  steroids:
+    concept: Concomitant_steroids
+  antibiotics:
+    concept: Concomitant_antibiotics
+  not mentioned:
+    concept: No_concomitant_treatment_recorded
+
+
+# =========================
+# RESPONSE TO FIRST LINE
+# =========================
+response_first_line:
+  CR:
+    concept: Complete_response
+  PR:
+    concept: Partial_response
+  SD:
+    concept: Stable_disease
+  PD:
+    concept: Progressive_disease
+  not evaluable:
+    concept: Response_not_evaluable
+
+# =========================
+# COMORBIDITIES
+# =========================
+comorbidities:
+  hypertension:
+    concept: Hypertension
+  diabetes:
+    concept: Diabetes
+  cardiovascular disease:
+    concept: Cardiovascular_disease
+  autoimmune disease:
+    concept: Autoimmune_disease
+  inflammatory bowel disease:
+    concept: Inflammatory_bowel_disease
+  interstitial lung disease:
+    concept: Interstitial_lung_disease
+  HIV:
+    concept: HIV_infection
+  hepatitis B:
+    concept: Hepatitis_B
+  hepatitis C:
+    concept: Hepatitis_C
+  other malignancy:
+    concept: Other_malignancy
+  active infection:
+    concept: Active_infection
+
+
+prior_systemic_therapies:
+
+  carboplatino:
+    concept: Carboplatin
+    is_a: Platinum_chemotherapy
+
+  cisplatino:
+    concept: Cisplatin
+    is_a: Platinum_chemotherapy
+
+  gemcitabina:
+    concept: Gemcitabine
+    is_a: Chemotherapy
+
+  # ---- IMMUNOTHERAPY ----
+  avelumab:
+    concept: Immunotherapy
+  pembrolizumab:
+    concept: Immunotherapy
+  nivolumab:
+    concept: Immunotherapy
+  atezolizumab:
+    concept: Immunotherapy
+  durvalumab:
+    concept: Immunotherapy
+  cemiplimab:
+    concept: Immunotherapy
+  ipilimumab:
+    concept: Immunotherapy
+  tremelimumab:
+    concept: Immunotherapy
+
+  # ---- TARGETED THERAPY ----
+  erlotinib:
+    concept: Targeted_therapy
+  gefitinib:
+    concept: Targeted_therapy
+  osimertinib:
+    concept: Targeted_therapy
+  afatinib:
+    concept: Targeted_therapy
+  crizotinib:
+    concept: Targeted_therapy
+  alectinib:
+    concept: Targeted_therapy
+  lorlatinib:
+    concept: Targeted_therapy
+  entrectinib:
+    concept: Targeted_therapy
+  dabrafenib:
+    concept: Targeted_therapy
+  trametinib:
+    concept: Targeted_therapy

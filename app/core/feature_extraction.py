@@ -149,6 +149,7 @@ LINE_OF_THERAPY
 • Se il testo indica candidabilità, pianificazione o avvio di prima linea → "1L"
 - Se non chiaramente indicata → "not mentioned".
 
+
 PD-L1
 - Estrarre SEMPRE se presente nel testo, anche se EGFR/ALK positivi.
 - Mappare solo nei bucket consentiti: "0%" | "<1%" | "1-49%" | ">=50%"

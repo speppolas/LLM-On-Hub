@@ -27,8 +27,16 @@ def ground_patient_facts(patient_json: dict, ontology: dict) -> dict:
         if value in (None, "not mentioned", ["not mentioned"]):
             continue
 
-        if field not in ontology:
+        # Direct field mapping
+        mapping = ontology.get(field)
+
+        # Special case: map systemic therapy agents to classes
+        if field == "prior_systemic_therapies":
+            mapping = ontology.get("systemic_therapy_agents")
+
+        if not mapping:
             continue
+
 
         mapping = ontology[field]
         values = value if isinstance(value, list) else [value]

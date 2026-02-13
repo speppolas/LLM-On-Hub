@@ -94,7 +94,8 @@ def extract_features_with_llm(text: str) -> Dict[str, Any]:
     prompt = f"""
 You are a clinical information extraction system.
 
-Your task is to extract a predefined and limited set of clinical features from the provided patient text.
+Your task is to extract a predefined and limited set of clinical features from the provided patient text: Testo:
+{text}.
 You MUST extract ONLY the features listed below.
 Do NOT infer, assume, normalize, or hallucinate any information.
 
@@ -118,24 +119,25 @@ FEATURES TO EXTRACT
 9. Response to First Line Treatment
 10. Concomitant Treatments
 11. Comorbidities
+12. Prior systemic therapies
 
 =====================
 OUTPUT FORMAT
 =====================
 
-{
+{{
   "age": "",
   "gender": "",
-  "diagnosis": "",
-  "histologic_variant": "",
-  "stage": "",
+  "histology": "",
+  "current_stage": "",
   "brain_metastasis": "",
   "ecog_ps": "",
   "line_of_therapy": "",
   "response_first_line": "",
   "concomitant_treatments": [],
   "comorbidities": []
-}
+  "prior_systemic_therapies":[]
+}}
 
 =====================
 ALLOWED VALUES
@@ -148,31 +150,20 @@ Age:
 Gender:
 - "male"
 - "female"
-- "other"
 - "not mentioned"
 
-Diagnosis:
-- "NSCLC"
-- "SCLC"
-- "urothelial carcinoma"
-- "other"
-- "not mentioned"
 
 Histologic Variant:
-- "adenocarcinoma"
+- "urothelial carcinoma"
 - "squamous"
-- "nonsquamous"
-- "small_cell"
-- "urothelial"
 - "not mentioned"
 
 Stage:
-- "Stage I"
-- "Stage II"
-- "Stage III"
-- "Stage IV"
-- "limited"
-- "extensive"
+- "I"
+- "II"
+- "III"
+- "IV"
+-if you see that the patient has metastes put always IV stage.
 - "not mentioned"
 
 Brain Metastasis:
@@ -231,6 +222,26 @@ Comorbidities (list):
 - "active infection"
 - "not mentioned"
 
+Prior stystemic Therapies:
+- "carboplatino"
+- "cisplatino"
+- "pemetrexed", "etoposide", "vinorelbine", "gemcitabine", "topotecan", "pembrolizumab", "nivolumab", "atezolizumab", "durvalumab", "cemiplimab", "bevacizumab"
+- "osimertinib", "erlotinib", "gefitinib", "alectinib", "lorlatinib", "amivantamab"
+
+PRIOR_SYSTEMIC_THERAPIES
+- Includi SOLO terapie sistemiche GIÀ SOMMINISTRATE.
+- Considera come somministrate frasi come:
+  "in trattamento con", "ha ricevuto", "precedentemente trattata con",
+  "dopo fallimento di", "in progressione dopo".
+- Escludi terapie pianificate, proposte o da iniziare.
+- Chirurgia e radioterapia NON sono terapie sistemiche.
+  Esempi:
+    • "la paziente è candidata a carboplatino + etoposide + atezolizumab"
+      → ["not mentioned"]
+    • "avvio del trattamento (primo ciclo senza immunoterapia)"
+      → ["not mentioned"]  
+    • "ha già ricevuto 2 cicli di carboplatino + etoposide"
+      → ["carboplatin","etoposide"]
 =====================
 STRICT RULES
 =====================
@@ -243,7 +254,6 @@ STRICT RULES
 
 The goal is conservative, safe extraction for downstream ontology-based eligibility reasoning.
 """
-
 
 
 

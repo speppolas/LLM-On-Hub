@@ -43,14 +43,7 @@ exclusion:
     condition: ontology_is_a
     value: SCLC
 
-  - id: EXC_PRIMARY_TARGETED_THERAPY_INDICATED
-    text: EGFR-, ALK-, or ROS1-directed therapy indicated as primary therapy
-    field: biomarkers
-    condition: contains_any
-    value:
-      - DRIVER_EGFR_SENSITIZING
-      - DRIVER_ALK
-      - ROS1
+
 
   - id: EXC_PRIOR_METASTATIC_SYSTEMIC_THERAPY
     text: Prior systemic anticancer therapy for metastatic NSCLC

@@ -11,7 +11,7 @@ inclusion:
     text: Advanced or metastatic non-squamous NSCLC
     field: histology
     condition: ontology_is_a
-    value: NSCLC_NON_SQUAMOUS
+    value: NSCLC
 
   - id: INC_ADVANCED_STAGE
     text: Advanced (unresectable Stage III) or metastatic disease
@@ -26,11 +26,9 @@ inclusion:
 
   - id: INC_EGFR_MUTATION
     text: EGFR mutation or other genomic alteration
-    field: biomarkers
-    condition: contains_any
-    value:
-      - DRIVER_EGFR_SENSITIZING
-      - EGFR_T790M
+    field: grounded_biomarkers    
+    condition: contains
+    value: DRIVER_EGFR_SENSITIZING
 
   - id: INC_PRIOR_EGFR_TKI
     text: Prior EGFR TKI therapy (1–2 lines)
@@ -52,8 +50,8 @@ inclusion:
   - id: INC_ECOG_0_1
     text: ECOG performance status 0–1
     field: ecog_ps
-    condition: ontology_is_a
-    value: ECOG_0_1
+    condition: lte
+    value: 1
 
 
 # =====================
@@ -78,12 +76,6 @@ exclusion:
         condition: not_equals
         value: osimertinib
 
-
-  - id: EXC_RECENT_SYSTEMIC_TX
-    text: Recent systemic anticancer therapy (<4 weeks)
-    field: prior_systemic_therapies
-    condition: not_equals
-    value: not mentioned
 
   - id: EXC_ACTIVE_INFECTION
     text: Active infection requiring systemic therapy
